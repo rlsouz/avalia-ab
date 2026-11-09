@@ -114,29 +114,243 @@ function responderMockDemo(urlStr, opcoes = {}) {
     });
   }
 
-  // 4. Módulos e Tabelas
-  if (cleanUrl.endsWith('/api/v1/escolas') || cleanUrl.endsWith('/api/v1/cadastros/escolas')) {
-    return jsonResponse(demoData.escolas || []);
-  }
+  // 4. Módulos e Tabelas (Leitura e Mutações com Persistência Reativa via AvaliaDB)
+  const db = window.AvaliaDB;
 
-  if (cleanUrl.endsWith('/api/v1/alunos') || cleanUrl.endsWith('/api/v1/cadastros/alunos')) {
-    return jsonResponse(demoData.alunos || []);
-  }
-
-  if (cleanUrl.endsWith('/api/v1/avaliacoes')) {
-    return jsonResponse(demoData.avaliacoes || []);
-  }
-
+  // USUÁRIOS
   if (cleanUrl.endsWith('/api/v1/cadastros/usuarios')) {
-    return jsonResponse(demoData.usuarios || []);
+    if (method === 'POST') {
+      const codigoSeq = String((db.obterTabela('usuarios').length || 0) + 1).padStart(4, '0');
+      const novoUsu = db.inserir('usuarios', {
+        codigo: bodyJson.codigo || codigoSeq,
+        nome: bodyJson.nome || 'Novo Usuário',
+        cpf: bodyJson.cpf || '',
+        cargo: bodyJson.cargo || (bodyJson.perfil === 'admin' ? 'Administrador Geral' : 'Coordenador Pedagógico'),
+        endereco: bodyJson.endereco || 'Água Boa - MT',
+        telefone: bodyJson.telefone || '',
+        email: bodyJson.email || '',
+        status: bodyJson.status || 'Ativo',
+        perfil: bodyJson.perfil || 'coordenador',
+        escola_vinculo: bodyJson.escola_vinculo || ''
+      });
+      return jsonResponse(novoUsu, 201);
+    }
+    return jsonResponse(db.obterTabela('usuarios'));
   }
 
+  const matchUsuId = cleanUrl.match(/\/api\/v1\/cadastros\/usuarios\/(\d+)/);
+  if (matchUsuId) {
+    const id = Number(matchUsuId[1]);
+    if (method === 'PUT') {
+      const atualizado = db.atualizar('usuarios', id, bodyJson);
+      return jsonResponse(atualizado || { id, ...bodyJson });
+    }
+    if (method === 'DELETE') {
+      db.excluir('usuarios', id);
+      return jsonResponse({ ok: true, mensagem: "Usuário excluído com sucesso." });
+    }
+  }
+
+  // ESCOLAS
+  if (cleanUrl.endsWith('/api/v1/escolas') || cleanUrl.endsWith('/api/v1/cadastros/escolas')) {
+    if (method === 'POST') {
+      const codigoSeq = String((db.obterTabela('escolas').length || 0) + 1).padStart(3, '0');
+      const novaEscola = db.inserir('escolas', {
+        codigo: bodyJson.codigo || codigoSeq,
+        nome: bodyJson.nome || 'Nova Escola',
+        endereco: bodyJson.endereco || '',
+        numero: bodyJson.numero || 'S/N',
+        bairro: bodyJson.bairro || 'Centro',
+        telefone: bodyJson.telefone || '',
+        codigo_inep: bodyJson.codigo_inep || '',
+        tipo_unidade: bodyJson.tipo_unidade || 'Urbana',
+        total_turmas: 0,
+        total_alunos: 0,
+        proficiencia_lp: 250.0,
+        proficiencia_mat: 250.0,
+        nota_media_lp: 8.0,
+        nota_media_mat: 8.0,
+        taxa_participacao: '100%',
+        status: 'Ativo'
+      });
+      return jsonResponse(novaEscola, 201);
+    }
+    return jsonResponse(db.obterTabela('escolas'));
+  }
+
+  const matchEscolaId = cleanUrl.match(/\/api\/v1\/cadastros\/escolas\/(\d+)/);
+  if (matchEscolaId) {
+    const id = Number(matchEscolaId[1]);
+    if (method === 'PUT') {
+      const atualizado = db.atualizar('escolas', id, bodyJson);
+      return jsonResponse(atualizado || { id, ...bodyJson });
+    }
+    if (method === 'DELETE') {
+      db.excluir('escolas', id);
+      return jsonResponse({ ok: true, mensagem: "Escola excluída com sucesso." });
+    }
+  }
+
+  // ALUNOS
+  if (cleanUrl.endsWith('/api/v1/alunos') || cleanUrl.endsWith('/api/v1/cadastros/alunos')) {
+    if (method === 'POST') {
+      const codigoSeq = String((db.obterTabela('alunos').length || 0) + 1).padStart(4, '0');
+      const novoAluno = db.inserir('alunos', {
+        codigo_escola: bodyJson.codigo_escola || '001',
+        nome_escola: bodyJson.nome_escola || 'Escola Municipal',
+        codigo_aluno: bodyJson.codigo_aluno || codigoSeq,
+        codigo_inep: bodyJson.codigo_inep || '',
+        nome: bodyJson.nome || 'Novo Aluno',
+        nome_responsavel: bodyJson.nome_responsavel || 'Responsável',
+        endereco: bodyJson.endereco || 'Água Boa - MT',
+        telefone_responsavel: bodyJson.telefone_responsavel || '',
+        turma: bodyJson.turma || '1º Ano',
+        sala: bodyJson.sala || 'Sala 01',
+        turno: bodyJson.turno || 'Matutino',
+        nota_lp: 8.0,
+        nota_mat: 8.0,
+        nota_ciencias: 8.0,
+        frequencia: '100%',
+        nivel_lp: 'Adequado',
+        nivel_mat: 'Adequado',
+        proficiencia_lp: 250.0,
+        proficiencia_mat: 250.0,
+        situacao: 'Ativo',
+        habilidades_dominadas_json: '[]',
+        habilidades_desenvolvimento_json: '[]',
+        habilidades_intervencao_json: '[]',
+        parecer_pedagogico: ''
+      });
+      return jsonResponse(novoAluno, 201);
+    }
+    return jsonResponse(db.obterTabela('alunos'));
+  }
+
+  const matchAlunoId = cleanUrl.match(/\/api\/v1\/cadastros\/alunos\/(\d+)/);
+  if (matchAlunoId) {
+    const id = Number(matchAlunoId[1]);
+    if (cleanUrl.endsWith('/notas') && method === 'PUT') {
+      const aluno = db.obterTabela('alunos').find(a => Number(a.id) === id);
+      if (aluno) {
+        const lp = Number(bodyJson.nota_lp ?? aluno.nota_lp);
+        const mat = Number(bodyJson.nota_mat ?? aluno.nota_mat);
+        const atualizado = db.atualizar('alunos', id, {
+          nota_lp: lp,
+          nota_mat: mat,
+          nivel_lp: lp >= 8 ? 'Avançado' : lp >= 7 ? 'Adequado' : lp >= 6 ? 'Básico' : 'Abaixo do Básico',
+          nivel_mat: mat >= 8 ? 'Avançado' : mat >= 7 ? 'Adequado' : mat >= 6 ? 'Básico' : 'Abaixo do Básico',
+          proficiencia_lp: Number((lp * 28 + 15).toFixed(1)),
+          proficiencia_mat: Number((mat * 28 + 18).toFixed(1))
+        });
+        return jsonResponse(atualizado);
+      }
+      return jsonResponse({ ok: true });
+    }
+    if (method === 'PUT') {
+      const atualizado = db.atualizar('alunos', id, bodyJson);
+      return jsonResponse(atualizado || { id, ...bodyJson });
+    }
+    if (method === 'DELETE') {
+      db.excluir('alunos', id);
+      return jsonResponse({ ok: true, mensagem: "Aluno excluído com sucesso." });
+    }
+  }
+
+  // TURMAS
   if (cleanUrl.endsWith('/api/v1/cadastros/turmas')) {
-    return jsonResponse(demoData.turmas || []);
+    if (method === 'POST') {
+      const novaTurma = db.inserir('turmas', {
+        codigo_escola: bodyJson.codigo_escola || '001',
+        nome_escola: bodyJson.nome_escola || 'Escola Municipal',
+        periodo_letivo: bodyJson.periodo_letivo || '2026 - Anual',
+        modalidade: bodyJson.modalidade || 'Ensino Fundamental Regular',
+        etapa: bodyJson.etapa || 'AI (1.º a 5.º) anos',
+        turma: bodyJson.turma || 'Turma A',
+        turno: bodyJson.turno || 'Matutino',
+        total_alunos: 0,
+        sala: bodyJson.sala || 'Sala 01'
+      });
+      return jsonResponse(novaTurma, 201);
+    }
+    return jsonResponse(db.obterTabela('turmas'));
   }
 
+  const matchTurmaId = cleanUrl.match(/\/api\/v1\/cadastros\/turmas\/(\d+)/);
+  if (matchTurmaId) {
+    const id = Number(matchTurmaId[1]);
+    if (method === 'PUT') {
+      const atualizado = db.atualizar('turmas', id, bodyJson);
+      return jsonResponse(atualizado || { id, ...bodyJson });
+    }
+    if (method === 'DELETE') {
+      db.excluir('turmas', id);
+      return jsonResponse({ ok: true, mensagem: "Turma excluída com sucesso." });
+    }
+  }
+
+  // MATRIZ CURRICULAR
   if (cleanUrl.endsWith('/api/v1/cadastros/matriz-curricular')) {
-    return jsonResponse(demoData.matriz_curricular || []);
+    if (method === 'POST') {
+      const novaMatriz = db.inserir('matriz_curricular', {
+        codigo_escola: bodyJson.codigo_escola || '001',
+        nome_escola: bodyJson.nome_escola || 'Escola Municipal',
+        codigo_aluno: bodyJson.codigo_aluno || '',
+        codigo_inep: bodyJson.codigo_inep || '',
+        nome: bodyJson.nome || '',
+        turma: bodyJson.turma || '1.º Ano',
+        sala: bodyJson.sala || 'Sala 01',
+        turno: bodyJson.turno || 'Matutino',
+        nome_disciplina: bodyJson.nome_disciplina || 'Língua Portuguesa',
+        carga_horaria: bodyJson.carga_horaria || '200h'
+      });
+      return jsonResponse(novaMatriz, 201);
+    }
+    return jsonResponse(db.obterTabela('matriz_curricular'));
+  }
+
+  const matchMatrizId = cleanUrl.match(/\/api\/v1\/cadastros\/matriz-curricular\/(\d+)/);
+  if (matchMatrizId) {
+    const id = Number(matchMatrizId[1]);
+    if (method === 'PUT') {
+      const atualizado = db.atualizar('matriz_curricular', id, bodyJson);
+      return jsonResponse(atualizado || { id, ...bodyJson });
+    }
+    if (method === 'DELETE') {
+      db.excluir('matriz_curricular', id);
+      return jsonResponse({ ok: true, mensagem: "Disciplina excluída com sucesso." });
+    }
+  }
+
+  // AVALIAÇÕES
+  if (cleanUrl.endsWith('/api/v1/avaliacoes')) {
+    if (method === 'POST') {
+      const novaAval = db.inserir('avaliacoes', {
+        codigo: bodyJson.codigo || 'AVAL-' + Date.now(),
+        titulo: bodyJson.titulo || 'Nova Avaliação',
+        componente: bodyJson.componente || 'Língua Portuguesa & Matemática',
+        ano_escolar: bodyJson.ano_escolar || '5º Ano',
+        tipo: bodyJson.tipo || 'Diagnóstica',
+        periodo_inicio: bodyJson.periodo_inicio || '2026-03-01',
+        periodo_fim: bodyJson.periodo_fim || '2026-03-15',
+        total_itens: Number(bodyJson.total_itens) || 20,
+        total_inscritos: 150,
+        total_avaliados: 0,
+        taxa_participacao: '0%',
+        proficiencia_media: 0.0,
+        status: 'Agendada'
+      });
+      return jsonResponse(novaAval, 201);
+    }
+    return jsonResponse(db.obterTabela('avaliacoes'));
+  }
+
+  const matchAvalId = cleanUrl.match(/\/api\/v1\/avaliacoes\/(\d+)/);
+  if (matchAvalId) {
+    const id = Number(matchAvalId[1]);
+    if (method === 'DELETE') {
+      db.excluir('avaliacoes', id);
+      return jsonResponse({ ok: true, mensagem: "Avaliação excluída com sucesso." });
+    }
   }
 
   // Boletim do Aluno
