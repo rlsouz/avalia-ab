@@ -509,7 +509,11 @@ function abrirModalCadUsuario() {
   document.getElementById('modal-cad-usuario-titulo').textContent = 'Novo Cadastro de Usuário';
   document.getElementById('cad-usu-id').value = '';
   document.getElementById('form-cad-usuario').reset();
-  const proximoSeq = String(listaUsuariosGlobal.length + 1).padStart(4, '0');
+  const maxCod = listaUsuariosGlobal.reduce((max, u) => {
+    const n = parseInt(u.codigo, 10);
+    return !isNaN(n) && n > max ? n : max;
+  }, 0);
+  const proximoSeq = String(maxCod + 1).padStart(4, '0');
   document.getElementById('cad-usu-codigo').value = proximoSeq;
   
   const selPerfil = document.getElementById('cad-usu-perfil');
@@ -724,8 +728,14 @@ function abrirModalCadEscola() {
   document.getElementById('modal-cad-escola-titulo').textContent = 'Novo Cadastro de Escola';
   document.getElementById('cad-esc-id').value = '';
   document.getElementById('form-cad-escola').reset();
-  const proximoSeq = String(listaEscolasGlobal.length + 1).padStart(3, '0');
+  const maxCod = listaEscolasGlobal.reduce((max, e) => {
+    const n = parseInt(e.codigo, 10);
+    return !isNaN(n) && n > max ? n : max;
+  }, 0);
+  const proximoSeq = String(maxCod + 1).padStart(3, '0');
   document.getElementById('cad-esc-codigo').value = proximoSeq;
+  const inepInput = document.getElementById('cad-esc-inep');
+  if (inepInput) inepInput.value = '';
   document.getElementById('btn-submit-escola').textContent = 'Cadastrar Escola';
   document.getElementById('modal-cad-escola').classList.add('active');
 }
@@ -883,7 +893,12 @@ function abrirModalCadAluno() {
   document.getElementById('cad-alu-id').value = '';
   document.getElementById('form-cad-aluno').reset();
   popularSelectEscolas(listaEscolasGlobal);
-  const proximoSeq = String(listaAlunosGlobal.length + 1).padStart(4, '0');
+  const maxCod = listaAlunosGlobal.reduce((max, a) => {
+    const cod = a.codigo_aluno || a.codigo;
+    const n = parseInt(cod, 10);
+    return !isNaN(n) && n > max ? n : max;
+  }, 0);
+  const proximoSeq = String(maxCod + 1).padStart(4, '0');
   document.getElementById('cad-alu-codigo').value = proximoSeq;
 
   const escolaCodigo = document.getElementById('cad-alu-escola-select').value;

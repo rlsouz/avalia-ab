@@ -1092,11 +1092,20 @@ def cadastrar_escola(dados: NovaEscolaCadastroDTO):
     sanitizar_dto_entrada(dados)
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT MAX(id) FROM escolas")
-    max_id = cursor.fetchone()[0] or 0
-    novo_id = max_id + 1
-    codigo_seq = f"{novo_id:03d}"
-    inep = dados.codigo_inep or f"5100{novo_id:04d}"
+    cursor.execute("SELECT codigo FROM escolas")
+    codigos_existentes = cursor.fetchall()
+    max_num = 0
+    for row in codigos_existentes:
+        cod_val = row[0] if isinstance(row, (list, tuple)) else row["codigo"]
+        try:
+            val_int = int(str(cod_val).strip())
+            if val_int > max_num:
+                max_num = val_int
+        except (ValueError, TypeError):
+            pass
+    
+    codigo_seq = f"{(max_num + 1):03d}"
+    inep = (dados.codigo_inep or "").strip()
     tipo = dados.tipo_unidade or "Urbana"
 
     cursor.execute("""

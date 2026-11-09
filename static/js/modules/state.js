@@ -120,7 +120,12 @@ function responderMockDemo(urlStr, opcoes = {}) {
   // USUÁRIOS
   if (cleanUrl.endsWith('/api/v1/cadastros/usuarios')) {
     if (method === 'POST') {
-      const codigoSeq = String((db.obterTabela('usuarios').length || 0) + 1).padStart(4, '0');
+      const usuariosExistentes = db.obterTabela('usuarios') || [];
+      const maxCod = usuariosExistentes.reduce((max, u) => {
+        const n = parseInt(u.codigo, 10);
+        return !isNaN(n) && n > max ? n : max;
+      }, 0);
+      const codigoSeq = String(maxCod + 1).padStart(4, '0');
       const novoUsu = db.inserir('usuarios', {
         codigo: bodyJson.codigo || codigoSeq,
         nome: bodyJson.nome || 'Novo Usuário',
@@ -154,7 +159,12 @@ function responderMockDemo(urlStr, opcoes = {}) {
   // ESCOLAS
   if (cleanUrl.endsWith('/api/v1/escolas') || cleanUrl.endsWith('/api/v1/cadastros/escolas')) {
     if (method === 'POST') {
-      const codigoSeq = String((db.obterTabela('escolas').length || 0) + 1).padStart(3, '0');
+      const escolasExistentes = db.obterTabela('escolas') || [];
+      const maxCod = escolasExistentes.reduce((max, e) => {
+        const n = parseInt(e.codigo, 10);
+        return !isNaN(n) && n > max ? n : max;
+      }, 0);
+      const codigoSeq = String(maxCod + 1).padStart(3, '0');
       const novaEscola = db.inserir('escolas', {
         codigo: bodyJson.codigo || codigoSeq,
         nome: bodyJson.nome || 'Nova Escola',
@@ -194,7 +204,13 @@ function responderMockDemo(urlStr, opcoes = {}) {
   // ALUNOS
   if (cleanUrl.endsWith('/api/v1/alunos') || cleanUrl.endsWith('/api/v1/cadastros/alunos')) {
     if (method === 'POST') {
-      const codigoSeq = String((db.obterTabela('alunos').length || 0) + 1).padStart(4, '0');
+      const alunosExistentes = db.obterTabela('alunos') || [];
+      const maxCod = alunosExistentes.reduce((max, a) => {
+        const cod = a.codigo_aluno || a.codigo;
+        const n = parseInt(cod, 10);
+        return !isNaN(n) && n > max ? n : max;
+      }, 0);
+      const codigoSeq = String(maxCod + 1).padStart(4, '0');
       const novoAluno = db.inserir('alunos', {
         codigo_escola: bodyJson.codigo_escola || '001',
         nome_escola: bodyJson.nome_escola || 'Escola Municipal',

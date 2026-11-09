@@ -226,3 +226,4 @@ with psycopg.connect(url_direct, autocommit=True) as conn:
             cur.execute(f"SELECT setval('{seq_table}_id_seq', COALESCE((SELECT MAX(id) FROM {seq_table}), 1), true);")
 
 print("[3/3] Migração para o Supabase concluída com sucesso total!")
+
