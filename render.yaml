@@ -1,12 +1,6 @@
-databases:
-  - name: avalia-ab-postgres
-    databaseName: avalia_ab
-    user: avalia_ab_user
-    plan: free
-
 services:
   - type: web
-    name: plataforma-avalia-ab
+    name: avalia-ab
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
@@ -15,8 +9,6 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.8
       - key: AVALIA_SECRET_KEY
-        generateValue: true
+        value: 028e69c1adccf7053b7fc1cb8cf51588a56ff797f7939fa161bd59c801b83635
       - key: DATABASE_URL
-        fromDatabase:
-          name: avalia-ab-postgres
-          property: connectionString
+        value: postgresql://postgres.utgyyjwiziekpcvbjjuf:AvaliaAB2026%40Seduc@aws-0-us-east-1.pooler.supabase.com:6543/postgres
