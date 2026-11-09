@@ -1,6 +1,7 @@
 // ==========================================
 // AVALIA AB - Loader de Componentes SPA
 // Carrega telas e modais de forma modular e performática com cache em memória
+// Compatível com Deploy Raiz, Servidor Local e GitHub Pages
 // ==========================================
 
 const ComponentLoader = {
@@ -29,26 +30,28 @@ const ComponentLoader = {
     const modalsContainer = document.getElementById('modals-container');
 
     const vParam = '?v=' + Date.now();
+    
+    // Caminhos relativos universais (compatíveis com localhost:8050 e com GitHub Pages /avalia-ab/)
     const views = [
-      '/static/views/dashboard.html' + vParam,
-      '/static/views/cadastros.html' + vParam,
-      '/static/views/avaliacoes.html' + vParam,
-      '/static/views/escolas.html' + vParam,
-      '/static/views/alunos.html' + vParam,
-      '/static/views/relatorios.html' + vParam,
-      '/static/views/configuracoes.html' + vParam,
-      '/static/views/notas.html' + vParam
+      'static/views/dashboard.html' + vParam,
+      'static/views/cadastros.html' + vParam,
+      'static/views/avaliacoes.html' + vParam,
+      'static/views/escolas.html' + vParam,
+      'static/views/alunos.html' + vParam,
+      'static/views/relatorios.html' + vParam,
+      'static/views/configuracoes.html' + vParam,
+      'static/views/notas.html' + vParam
     ];
 
     const modals = [
-      '/static/modals/modal-cad-usuario.html' + vParam,
-      '/static/modals/modal-cad-escola.html' + vParam,
-      '/static/modals/modal-cad-aluno.html' + vParam,
-      '/static/modals/modal-cad-turma.html' + vParam,
-      '/static/modals/modal-cad-matriz.html' + vParam,
-      '/static/modals/modal-nova-avaliacao.html' + vParam,
-      '/static/modals/modal-boletim-aluno.html' + vParam,
-      '/static/modals/modal-editar-nota-aluno.html' + vParam
+      'static/modals/modal-cad-usuario.html' + vParam,
+      'static/modals/modal-cad-escola.html' + vParam,
+      'static/modals/modal-cad-aluno.html' + vParam,
+      'static/modals/modal-cad-turma.html' + vParam,
+      'static/modals/modal-cad-matriz.html' + vParam,
+      'static/modals/modal-nova-avaliacao.html' + vParam,
+      'static/modals/modal-boletim-aluno.html' + vParam,
+      'static/modals/modal-editar-nota-aluno.html' + vParam
     ];
 
     // Carregamento paralelo em lote de altíssima velocidade

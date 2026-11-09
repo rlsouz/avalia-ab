@@ -1,0 +1,134 @@
+    <div id="screen-notas" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Lançamento e Gestão de Notas dos Estudantes</h2>
+          <p class="section-desc">Seleção sequencial: Escolha a Escola ➔ Escolha a Turma ➔ Ano Letivo ➔ Lance e Edite as Notas dos Alunos com salvamento imediato.</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-secondary" onclick="carregarDadosModuloNotas()">
+            Recarregar Dados
+          </button>
+        </div>
+      </div>
+
+      <!-- PAINEL DE FILTROS SEQUENCIAIS (ESCOLA -> TURMA -> DISCIPLINA -> ANO -> BUSCA) -->
+      <div class="glass-panel panel-filtro-notas">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <h3 style="font-size: 0.95rem; color: var(--gov-primary); margin: 0; font-weight: 700;">
+            Filtros Pedagógicos para Lançamento de Notas
+          </h3>
+          <span style="font-size: 0.75rem; color: var(--text-dim);">Ciclo Letivo Ativo: 2026</span>
+        </div>
+
+        <div class="grid-filtros-notas">
+          <!-- 1. ESCOLHA DA ESCOLA -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              1. Unidade Escolar *
+            </label>
+            <select id="notas-filtro-escola" class="form-control form-control-compact" onchange="aoSelecionarEscolaNotas(this.value)">
+              <option value="">-- Selecione uma Escola --</option>
+            </select>
+          </div>
+
+          <!-- 2. ESCOLHA DA TURMA -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              2. Turma *
+            </label>
+            <select id="notas-filtro-turma" class="form-control form-control-compact" onchange="aoSelecionarTurmaNotas(this.value)" disabled>
+              <option value="">-- Escolha a Escola --</option>
+            </select>
+          </div>
+
+          <!-- 3. ESCOLHA DA DISCIPLINA / COMPONENTE CURRICULAR -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              3. Disciplina *
+            </label>
+            <select id="notas-filtro-disciplina" class="form-control form-control-compact" onchange="aoSelecionarDisciplinaNotas(this.value)">
+              <option value="todas">Todas as Disciplinas</option>
+              <option value="Língua Portuguesa">Língua Portuguesa (LP)</option>
+              <option value="Matemática">Matemática (MAT)</option>
+            </select>
+          </div>
+
+          <!-- 4. ANO LETIVO -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              4. Ano Letivo *
+            </label>
+            <select id="notas-filtro-ano-letivo" class="form-control form-control-compact" onchange="aoAlterarAnoLetivoNotas(this.value)">
+              <option value="2026" selected>2026 (Atual)</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+            </select>
+          </div>
+
+          <!-- 5. PESQUISAR ALUNO -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              5. Buscar Aluno (Opcional)
+            </label>
+            <input type="text" id="notas-busca-aluno" class="form-control form-control-compact" placeholder="Nome, cód. ou INEP..." oninput="filtrarTabelaNotasAlunos(this.value)">
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD RESUMO E INFORMAÇÕES DA TURMA SELECIONADA -->
+      <div id="notas-turma-badge-resumo" class="glass-panel" style="padding: 10px 16px; margin-bottom: 14px; display: none; align-items: center; justify-content: space-between; border-left: 4px solid var(--gov-primary); border-radius: 10px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div>
+            <h4 id="notas-info-escola-turma" style="margin: 0; color: var(--gov-primary); font-size: 0.92rem; font-weight: 700;">Escola / Turma</h4>
+            <span id="notas-info-detalhe" style="font-size: 0.78rem; color: var(--text-muted);">Ano Letivo 2026</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span class="badge-tag primary" id="notas-total-estudantes-badge" style="font-size: 0.76rem; padding: 3px 8px;">0 Alunos</span>
+          <button class="btn btn-secondary" style="font-size: 0.76rem; padding: 5px 10px;" onclick="salvarTodasAsNotasEmMassa()">
+            Salvar Todas as Notas da Turma
+          </button>
+        </div>
+      </div>
+
+      <!-- LISTAGEM DOS ALUNOS COM CAMPOS DE NOTAS E AÇÕES -->
+      <div class="glass-panel" style="padding: 16px 20px; border-radius: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="margin: 0; color: var(--gov-primary); font-size: 1rem; font-weight: 700;">Lista de Alunos da Turma</h3>
+            <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: var(--text-muted);">Digite a nota diretamente nos campos ou clique em <strong>Editar</strong>. Clique em <strong>Salvar</strong> para registrar.</p>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--gov-primary); background: var(--gov-primary-light); padding: 6px 14px; border-radius: 20px; border: 1px solid #bfdbfe;">
+            Notas no formato 0 a 10 (Ex: 7,5 • 8,0 • 9,5). Atualiza automaticamente o nível de desempenho do aluno.
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="modern-table" id="tabela-notas-alunos">
+            <thead>
+              <tr>
+                <th style="width: 70px;">Cód.</th>
+                <th>Nome do Estudante</th>
+                <th>INEP</th>
+                <th id="th-col-lp" style="width: 130px; text-align: center;">Português LP (0 a 10)</th>
+                <th id="th-col-mat" style="width: 130px; text-align: center;">Matemática MAT (0 a 10)</th>
+                <th style="width: 130px; text-align: center;">Nível / Situação</th>
+                <th style="width: 160px; text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-notas-alunos">
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                  Selecione a Escola e a Turma acima para listar os alunos.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+
+  <!-- ========================================== -->
+  <!-- MODAIS DE CADASTRO E EDIÇÃO (2.a, b, c, d, e, f) -->

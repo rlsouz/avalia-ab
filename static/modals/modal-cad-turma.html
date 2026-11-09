@@ -1,0 +1,66 @@
+  <!-- Modal: Cadastro / Edição de Turma (2.e) -->
+  <div id="modal-cad-turma" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-cad-turma-titulo">Cadastro de Turma Escolar</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-cad-turma')">&times;</button>
+      </div>
+      <form id="form-cad-turma" onsubmit="salvarNovaTurma(event)">
+        <input type="hidden" id="cad-tur-id">
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Código da Escola (XXX)</label>
+            <select id="cad-tur-escola-select" class="modal-select" onchange="atualizarNomeEscolaTurmaPorCodigo(this.value)" required>
+              <!-- Preenchido via JS -->
+            </select>
+          </div>
+          <div class="modal-form-group">
+            <label>Nome da Escola</label>
+            <input type="text" id="cad-tur-escola-nome" class="modal-input" readonly style="background: #f1f5f9;">
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Período Letivo</label>
+            <input type="text" id="cad-tur-periodo" class="modal-input" value="2026 - Anual" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Modalidade</label>
+            <select id="cad-tur-modalidade" class="modal-select">
+              <option value="Ensino Fundamental Regular">Ensino Fundamental Regular</option>
+              <option value="Educação Infantil">Educação Infantil</option>
+              <option value="Educação do Campo">Educação do Campo</option>
+              <option value="Educação Escolar Indígena">Educação Escolar Indígena</option>
+              <option value="EJA">Educação de Jovens e Adultos (EJA)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Etapa</label>
+            <input type="text" id="cad-tur-etapa" class="modal-input" placeholder="Ex: Anos Iniciais (1º ao 5º)" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Identificação da Turma</label>
+            <input type="text" id="cad-tur-nome" class="modal-input" placeholder="Ex: 5º Ano C" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Turno</label>
+            <select id="cad-tur-turno" class="modal-select">
+              <option value="Matutino">Matutino</option>
+              <option value="Vespertino">Vespertino</option>
+              <option value="Integral">Integral</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-cad-turma')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-turma">Cadastrar Turma</button>
+        </div>
+      </form>
+    </div>
+
+  </div>

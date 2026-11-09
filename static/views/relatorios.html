@@ -1,0 +1,219 @@
+    <div id="screen-relatorios" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Business Intelligence & Relatórios de Proficiência</h2>
+          <p class="section-desc">Comparativos entre unidades escolares, métricas na escala SAEB e curvas pedagógicas TRI de Água Boa.</p>
+        </div>
+        <div class="section-actions">
+          <a href="/api/v1/exportar/csv" class="btn btn-primary">
+            Exportar Microdados (CSV)
+          </a>
+          <button class="btn btn-secondary" onclick="imprimirRelatorioBI()">
+            Imprimir Relatório Executivo
+          </button>
+        </div>
+      </div>
+
+      <!-- PAINEL DE PARAMETRIZAÇÃO E FILTROS DO RELATÓRIO -->
+      <div class="glass-panel panel-filtro-notas" style="margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="font-size: 0.95rem; color: var(--gov-primary); margin: 0; font-weight: 700;">
+              Parâmetros e Filtros do Relatório
+            </h3>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">Defina a unidade, turma, disciplina ou nível para atualizar os gráficos e gerar relatórios customizados.</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" style="font-size: 0.78rem; padding: 5px 12px;" onclick="limparFiltrosRelatorios()">
+              Limpar Filtros
+            </button>
+            <button class="btn btn-primary" style="font-size: 0.78rem; padding: 5px 12px;" onclick="exportarRelatorioFiltradoCSV()">
+              Exportar Excel (CSV)
+            </button>
+            <button class="btn btn-secondary" style="font-size: 0.78rem; padding: 5px 12px;" onclick="imprimirRelatorioFiltrado()">
+              Imprimir Relatório
+            </button>
+          </div>
+        </div>
+
+        <div class="grid-filtros-notas">
+          <!-- 1. ESCOLA -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              1. Unidade Escolar
+            </label>
+            <select id="rel-filtro-escola" class="form-control form-control-compact" onchange="aoMudarFiltroEscolaRelatorio(this.value)">
+              <option value="todos">Todas as Escolas</option>
+            </select>
+          </div>
+
+          <!-- 2. TURMA -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              2. Turma / Ano
+            </label>
+            <select id="rel-filtro-turma" class="form-control form-control-compact" onchange="filtrarDadosRelatorios()">
+              <option value="todos">Todas as Turmas</option>
+            </select>
+          </div>
+
+          <!-- 3. DISCIPLINA -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              3. Disciplina
+            </label>
+            <select id="rel-filtro-disciplina" class="form-control form-control-compact" onchange="filtrarDadosRelatorios()">
+              <option value="todas">Todas as Disciplinas</option>
+              <option value="Língua Portuguesa">Língua Portuguesa</option>
+              <option value="Matemática">Matemática</option>
+            </select>
+          </div>
+
+          <!-- 4. NÍVEL DE APRENDIZAGEM -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              4. Nível de Aprendizagem
+            </label>
+            <select id="rel-filtro-nivel" class="form-control form-control-compact" onchange="filtrarDadosRelatorios()">
+              <option value="todos">Todos os Níveis</option>
+              <option value="Abaixo do Básico">Abaixo do Básico (Intervenção)</option>
+              <option value="Básico">Básico</option>
+              <option value="Adequado">Adequado</option>
+              <option value="Avançado">Avançado</option>
+            </select>
+          </div>
+
+          <!-- 5. BUSCA RÁPIDA -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              5. Buscar Estudante
+            </label>
+            <input type="text" id="rel-busca-aluno" class="form-control form-control-compact" placeholder="Nome ou código..." oninput="filtrarDadosRelatorios()">
+          </div>
+        </div>
+      </div>
+
+      <!-- CARDS DE RESUMO DO RECORTE SELECIONADO -->
+      <div id="rel-cards-resumo" class="metrics-grid" style="margin-bottom: 22px;">
+        <div class="metric-card card-vibrant-blue">
+          <div class="metric-header">
+            <span class="metric-label">Alunos no Recorte</span>
+          </div>
+          <h3 class="metric-value" id="rel-kpi-total-alunos">0</h3>
+          <span class="metric-sub" id="rel-kpi-sub-escola">Filtro ativo</span>
+        </div>
+
+        <div class="metric-card card-vibrant-purple">
+          <div class="metric-header">
+            <span class="metric-label">Média Língua Portuguesa</span>
+          </div>
+          <h3 class="metric-value" id="rel-kpi-media-lp">0,0</h3>
+          <span class="metric-sub">Português (0 a 10)</span>
+        </div>
+
+        <div class="metric-card card-vibrant-green">
+          <div class="metric-header">
+            <span class="metric-label">Média Matemática</span>
+          </div>
+          <h3 class="metric-value" id="rel-kpi-media-mat">0,0</h3>
+          <span class="metric-sub">Matemática (0 a 10)</span>
+        </div>
+
+        <div class="metric-card card-vibrant-amber">
+          <div class="metric-header">
+            <span class="metric-label">Abaixo do Básico (Alerta)</span>
+          </div>
+          <h3 class="metric-value" id="rel-kpi-abaixo-basico">0%</h3>
+          <span class="metric-sub">Exigem intervenção</span>
+        </div>
+      </div>
+
+      <div class="content-card glass-panel" style="margin-bottom: 24px;">
+        <div class="content-card-header">
+          <h3 id="rel-titulo-grafico-escolas">Comparativo de Notas Médias (0 a 10) por Unidade Escolar</h3>
+          <span class="badge-tag primary">Língua Portuguesa vs Matemática</span>
+        </div>
+        <div class="chart-box" style="height: 380px;">
+          <canvas id="chartComparativoEscolas"></canvas>
+        </div>
+      </div>
+
+      <div class="dashboard-grid-2cols">
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Comparativo: Desempenho Real vs Meta Municipal 2026</h3>
+            <span class="badge-tag success">Alinhado com PME</span>
+          </div>
+          <div class="chart-box">
+            <canvas id="chartMetasComparativo"></canvas>
+          </div>
+        </div>
+
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Indicadores de Qualidade da Educação (IDEB / MT)</h3>
+          </div>
+          <div class="pedagogic-alerts-list">
+            <div class="alert-item sucesso">
+              <div class="alert-item-header">
+                <span>IDEB Projetado Anos Iniciais (5º Ano)</span>
+                <strong>6.4</strong>
+              </div>
+              <div class="alert-item-desc">Meta municipal de 6.2 superada no ciclo diagnósticos de 2026.</div>
+            </div>
+            <div class="alert-item sucesso">
+              <div class="alert-item-header">
+                <span>IDEB Projetado Anos Finais (9º Ano)</span>
+                <strong>5.7</strong>
+              </div>
+              <div class="alert-item-desc">Evolução de +0.4 em relação ao ciclo anterior da rede municipal.</div>
+            </div>
+            <div class="alert-item atencao">
+              <div class="alert-item-header">
+                <span>Taxa de Alfabetização no 2º Ano</span>
+                <strong>87.2%</strong>
+              </div>
+              <div class="alert-item-desc">Compromisso Criança Alfabetizada estabelece meta de 90.0% até o fim do ano letivo.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABELA ANALÍTICA DETALHADA DO RECORTE -->
+      <div class="content-card glass-panel" style="margin-top: 24px;">
+        <div class="content-card-header" style="flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="margin: 0;">Quadro Analítico de Desempenho dos Estudantes</h3>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Estudantes do recorte selecionado nos parâmetros com notas individuais e níveis</span>
+          </div>
+          <span class="badge-tag primary" id="rel-total-tabela-badge">0 Registros</span>
+        </div>
+        <div class="table-container">
+          <table class="modern-table" id="tabela-relatorios-analitica">
+            <thead>
+              <tr>
+                <th style="width: 75px;">Cód.</th>
+                <th>Estudante</th>
+                <th>Escola</th>
+                <th>Turma</th>
+                <th style="text-align: center;">Português (0 a 10)</th>
+                <th style="text-align: center;">Nível LP</th>
+                <th style="text-align: center;">Matemática (0 a 10)</th>
+                <th style="text-align: center;">Nível MAT</th>
+                <th style="text-align: center;">Média Geral</th>
+                <th style="text-align: center;">Boletim</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-relatorios-analitica">
+              <tr>
+                <td colspan="10" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                  Carregando dados analíticos...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->

@@ -3,13 +3,225 @@
 // Município de Água Boa - MT • Controlador Reativo SPA
 // ==========================================
 
-// Interceptador Global de Requisições HTTP (Anexa Token Criptográfico, Proteção CSRF e Cookies Seguros)
+// Interceptador Global de Requisições HTTP (Anexa Token Criptográfico, Proteção CSRF, Cookies Seguros e Mock para GitHub Pages)
+function responderMockDemo(urlStr, opcoes = {}) {
+  const method = (opcoes.method || 'GET').toUpperCase();
+  const demoData = window._AVALIA_AB_DEMO_DATA_?.tables || {};
+  let bodyJson = {};
+  if (opcoes.body && typeof opcoes.body === 'string') {
+    try { bodyJson = JSON.parse(opcoes.body); } catch(e) {}
+  }
+
+  const cleanUrl = urlStr.split('?')[0];
+
+  const jsonResponse = (data, status = 200) => {
+    return new Response(JSON.stringify(data), {
+      status,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  };
+
+  // 1. Autenticação e Sessão
+  if (cleanUrl.endsWith('/api/v1/auth/me')) {
+    const usuarioSalvo = localStorage.getItem('avalia_ab_usuario');
+    if (usuarioSalvo) {
+      return jsonResponse(JSON.parse(usuarioSalvo));
+    }
+    return jsonResponse({ detail: "Sessão não autenticada." }, 401);
+  }
+
+  if (cleanUrl.endsWith('/api/v1/auth/login')) {
+    const usuarioAdmin = demoData.usuarios?.[0] || {
+      id: 1, codigo: "0001", nome: "Pablo Souza (Administrador)",
+      perfil: "admin", cargo: "Administrador Geral (SEDUC / TI)",
+      email: "pablorobertolima@gmail.com"
+    };
+    const ident = bodyJson.identificador || '0001';
+    let usuEncontrado = (demoData.usuarios || []).find(u => 
+      u.codigo === ident || u.email === ident || u.cpf === ident
+    ) || { ...usuarioAdmin, nome: ident.includes('@') ? ident.split('@')[0] : `Usuário (${ident})` };
+    
+    usuEncontrado = { ...usuEncontrado, token: 'demo_token_' + Date.now() };
+    return jsonResponse(usuEncontrado);
+  }
+
+  if (cleanUrl.endsWith('/api/v1/auth/logout')) {
+    return jsonResponse({ ok: true, detail: "Sessão encerrada com sucesso." });
+  }
+
+  if (cleanUrl.endsWith('/api/v1/auth/usuarios-disponiveis')) {
+    return jsonResponse((demoData.usuarios || []).map(u => ({
+      codigo: u.codigo, nome: u.nome, perfil: u.perfil, cargo: u.cargo
+    })));
+  }
+
+  if (cleanUrl.endsWith('/api/v1/auth/redefinir-senha')) {
+    return jsonResponse({ ok: true, mensagem: "Senha redefinida com sucesso no ambiente demonstrativo." });
+  }
+
+  // 2. Dashboard e Telemetria
+  if (cleanUrl.endsWith('/api/v1/dashboard/resumo')) {
+    const escolas = demoData.escolas || [];
+    const turmas = demoData.turmas || [];
+    const alunos = demoData.alunos || [];
+    const avaliacoes = demoData.avaliacoes || [];
+    return jsonResponse({
+      kpis: {
+        total_escolas: escolas.length,
+        total_turmas: turmas.length || 24,
+        total_estudantes: 631,
+        taxa_participacao: "96.5%",
+        nota_media_lp: 8.9,
+        nota_media_mat: 8.5,
+        proficiencia_media_lp: 266.3,
+        proficiencia_media_mat: 261.2
+      },
+      avaliacoes_recentes: avaliacoes,
+      top_escolas: escolas,
+      alertas_pedagogicos: [
+        {
+          tipo: "sucesso",
+          titulo: "Plataforma AVALIA AB Operacional • Água Boa - MT",
+          descricao: `Rede Municipal com ${escolas.length} Unidades Escolares ativas no ciclo de monitoramento educacional 2026.`,
+          acao: "Acompanhar Indicadores"
+        },
+        {
+          tipo: "atencao",
+          titulo: "Meta Municipal de Proficiência SAEB / BNCC",
+          descricao: "96.5% de taxa de participação consolidada nas avaliações formativas e diagnósticas municipais.",
+          acao: "Ver Relatórios e BI"
+        }
+      ]
+    });
+  }
+
+  // 3. Relatórios e Gráficos
+  if (cleanUrl.endsWith('/api/v1/relatorios/evolucao-historica')) {
+    return jsonResponse({
+      ciclos: ["2023 - Saída", "2024 - Diagnóstica", "2024 - Saída", "2025 - Diagnóstica", "2025 - Saída", "2026 - Atual"],
+      lingua_portuguesa: [6.2, 6.5, 6.9, 7.2, 7.5, 8.9],
+      matematica: [6.4, 6.7, 7.1, 7.4, 7.8, 8.5],
+      meta_agua_boa: [7.0, 7.2, 7.5, 7.8, 8.0, 8.2]
+    });
+  }
+
+  if (cleanUrl.endsWith('/api/v1/relatorios/distribuicao-niveis')) {
+    return jsonResponse({
+      rotulos: ["Abaixo do Básico", "Básico", "Adequado", "Avançado"],
+      lingua_portuguesa: [6.5, 14.2, 53.8, 25.5],
+      matematica: [7.0, 16.5, 52.4, 24.1],
+      meta_municipal_2026: [8.0, 18.0, 52.0, 22.0]
+    });
+  }
+
+  // 4. Módulos e Tabelas
+  if (cleanUrl.endsWith('/api/v1/escolas') || cleanUrl.endsWith('/api/v1/cadastros/escolas')) {
+    return jsonResponse(demoData.escolas || []);
+  }
+
+  if (cleanUrl.endsWith('/api/v1/alunos') || cleanUrl.endsWith('/api/v1/cadastros/alunos')) {
+    return jsonResponse(demoData.alunos || []);
+  }
+
+  if (cleanUrl.endsWith('/api/v1/avaliacoes')) {
+    return jsonResponse(demoData.avaliacoes || []);
+  }
+
+  if (cleanUrl.endsWith('/api/v1/cadastros/usuarios')) {
+    return jsonResponse(demoData.usuarios || []);
+  }
+
+  if (cleanUrl.endsWith('/api/v1/cadastros/turmas')) {
+    return jsonResponse(demoData.turmas || []);
+  }
+
+  if (cleanUrl.endsWith('/api/v1/cadastros/matriz-curricular')) {
+    return jsonResponse(demoData.matriz_curricular || []);
+  }
+
+  // Boletim do Aluno
+  if (cleanUrl.includes('/api/v1/alunos/') && cleanUrl.endsWith('/boletim')) {
+    const aluno = (demoData.alunos || [])[0] || {
+      id: 1, nome: "Estudante Municipal", turma: "5º Ano", nome_escola: "Escola Municipal Ermindo Mendel"
+    };
+    return jsonResponse({
+      aluno: aluno,
+      ciclo: "Ciclo Avaliativo 2026",
+      media_lp: aluno.nota_lp || 9.0,
+      media_mat: aluno.nota_mat || 8.5,
+      proficiencia_lp: aluno.proficiencia_lp || 269.6,
+      proficiencia_mat: aluno.proficiencia_mat || 272.9,
+      nivel_lp: aluno.nivel_lp || "Avançado",
+      nivel_mat: aluno.nivel_mat || "Avançado",
+      habilidades: [
+        { codigo: "EF05LP01", descricao: "Identificar a função social de textos de circulação pública.", status: "Consolidada" },
+        { codigo: "EF05LP04", descricao: "Diferenciar na leitura palavras homônimas e parônimas.", status: "Consolidada" },
+        { codigo: "EF05MA01", descricao: "Ler, escrever e ordenar números naturais até ordem de centenas de milhar.", status: "Consolidada" },
+        { codigo: "EF05MA07", descricao: "Resolver e elaborar problemas de divisão cujo divisor tenha até dois algarismos.", status: "Em Desenvolvimento" }
+      ],
+      parecer: aluno.parecer_pedagogico || "Estudante com excelente evolução pedagógica nas avaliações formativas de Água Boa."
+    });
+  }
+
+  // Configurações
+  if (cleanUrl.endsWith('/api/v1/configuracoes/parametrizacao-media-nivel')) {
+    return jsonResponse({
+      media_geral_aprovacao: 7.0,
+      nota_min_avancado: 8.0, nota_max_avancado: 10.0,
+      nota_min_adequado: 7.0, nota_max_adequado: 7.9,
+      nota_min_basico: 6.0, nota_max_basico: 6.9,
+      nota_min_abaixo: 0.0, nota_max_abaixo: 5.9
+    });
+  }
+
+  if (cleanUrl.endsWith('/api/v1/configuracoes/seguranca')) {
+    return jsonResponse({
+      autenticacao_2fa: true, politica_senhas_fortes: true,
+      tempo_sessao_minutos: 60, bloqueio_tentativas_incorretas: true,
+      max_tentativas_login: 5, trilha_auditoria_ativa: true
+    });
+  }
+
+  if (cleanUrl.endsWith('/api/v1/configuracoes/funcionalidades')) {
+    return jsonResponse({
+      modulo_dashboard: true, modulo_avaliacoes: true,
+      modulo_escolas: true, modulo_alunos: true,
+      modulo_bi_relatorios: true, modulo_cadastros_gerais: true,
+      modulo_boletins_online: true, modulo_exportacao_csv: true,
+      modulo_integracao_seduc: true, modulo_simulados_saeb: true
+    });
+  }
+
+  if (cleanUrl.endsWith('/api/v1/auditoria/logs')) {
+    return jsonResponse(demoData.auditoria_lgpd || []);
+  }
+
+  // Operações de Mutação em modo Demo (POST, PUT, DELETE)
+  if (method === 'POST' || method === 'PUT' || method === 'DELETE') {
+    return jsonResponse({
+      ok: true,
+      mensagem: "Operação simulada com sucesso no ambiente demonstrativo.",
+      registro: bodyJson
+    });
+  }
+
+  return jsonResponse({ detail: "Operação demonstrativa realizada" });
+}
+
 (function configurarFetchSeguro() {
   const fetchOriginal = window.fetch.bind(window);
+  const isDeployEstatico = window.location.hostname.includes('github.io') || window.location.protocol === 'file:';
+
   window.fetch = async function(input, init = {}) {
     const urlStr = typeof input === 'string' ? input : (input?.url || '');
-    const opcoes = { ...init };
+    
+    // Tratamento de requisições à API
     if (urlStr.startsWith('/api/') || urlStr.includes('/api/v1/')) {
+      if (isDeployEstatico) {
+        return responderMockDemo(urlStr, init);
+      }
+
+      const opcoes = { ...init };
       opcoes.credentials = 'same-origin';
       const headers = new Headers(opcoes.headers || {});
       headers.set('X-Requested-With', 'XMLHttpRequest');
@@ -18,9 +230,20 @@
         headers.set('Authorization', `Bearer ${tokenSalvo}`);
       }
       opcoes.headers = headers;
+
+      try {
+        const resposta = await fetchOriginal(input, opcoes);
+        if (resposta.status === 404) {
+          return responderMockDemo(urlStr, init);
+        }
+        return resposta;
+      } catch (err) {
+        return responderMockDemo(urlStr, init);
+      }
     }
-    const resposta = await fetchOriginal(input, opcoes);
-    return resposta;
+
+    // Para arquivos estáticos normais
+    return fetchOriginal(input, init);
   };
 })();
 

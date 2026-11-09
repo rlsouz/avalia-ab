@@ -1792,12 +1792,17 @@ def exportar_dados_csv(
 
 # --- SERVIR FRONTEND ESTÁTICO ---
 static_dir = os.path.join(os.path.dirname(__file__), "static")
+if not os.path.exists(static_dir):
+    static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.get("/")
 def serve_index():
-    index_file = os.path.join(static_dir, "index.html")
+    index_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "index.html")
+    if not os.path.exists(index_file):
+        index_file = os.path.join(static_dir, "index.html")
     if os.path.exists(index_file):
         return FileResponse(index_file)
     return {"message": "AVALIA AB - API Operacional. Acesse /docs para documentação OpenAPI."}

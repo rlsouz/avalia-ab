@@ -1,0 +1,432 @@
+    <div id="screen-configuracoes" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Configurações Gerais da Plataforma</h2>
+          <p class="section-desc">Gerenciamento de Segurança, Permissões e Habilitação/Desabilitação de Funcionalidades do AVALIA AB.</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-primary" onclick="salvarTodasConfiguracoes()">
+            Salvar Todas as Configurações
+          </button>
+        </div>
+      </div>
+
+      <!-- SUB-ABAS DE CONFIGURAÇÃO -->
+      <nav class="sub-nav-tabs">
+        <button class="sub-tab-btn active" id="btn-subcfg-media-niveis" onclick="trocarSubAbaConfig('media-niveis')">
+          Média Geral & Níveis de Aprendizagem
+        </button>
+        <button class="sub-tab-btn" id="btn-subcfg-seguranca" onclick="trocarSubAbaConfig('seguranca')">
+          Seguranças & Acessos
+        </button>
+        <button class="sub-tab-btn" id="btn-subcfg-funcionalidades" onclick="trocarSubAbaConfig('funcionalidades')">
+          Habilitar e Desabilitar Funcionalidades
+        </button>
+        <button class="sub-tab-btn" id="btn-subcfg-sincronizacao" onclick="trocarSubAbaConfig('sincronizacao')">
+          Sincronização, Exportação & OpenAPI
+        </button>
+      </nav>
+
+      <!-- Sub-Aba: Parametrização da Média Geral e Níveis de Aprendizagem -->
+      <div id="sub-config-media-niveis" class="sub-config-content">
+        <div class="content-card glass-panel" style="margin-bottom: 24px;">
+          <div class="content-card-header">
+            <div>
+              <h3>Parametrização da Média Geral e Níveis de Aprendizagem</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                Defina a nota média padrão da rede e as faixas de corte para a classificação automática dos estudantes em todos os módulos e boletins.
+              </p>
+            </div>
+            <span class="badge-tag primary">Classificação Automática</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-top: 16px;">
+            <!-- Média Geral de Aprovação -->
+            <div style="background: #ffffff; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm);">
+              <label style="font-weight: 700; color: var(--gov-primary); font-size: 0.95rem; display: block; margin-bottom: 6px;">
+                Média Geral de Aprovação da Rede
+              </label>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                Nota de corte mínima exigida para aprovação curricular em Água Boa - MT.
+              </p>
+              <input type="number" id="cfg-media-geral" class="form-control" step="0.1" min="0" max="10" value="6.0" style="font-size: 1.15rem; font-weight: 700; max-width: 160px;">
+            </div>
+
+            <!-- Faixa: Avançado -->
+            <div style="background: #ffffff; border: 1px solid #bbf7d0; border-left: 5px solid #16a34a; border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-weight: 700; color: #166534; font-size: 0.95rem;">
+                  Nível Avançado
+                </label>
+                <span class="badge-status ativo">Avançado</span>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                Desempenho plenamente consolidado além da expectativa municipal.
+              </p>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="number" id="cfg-min-avancado" class="form-control" step="0.1" min="0" max="10" value="8.0" style="font-weight: 700; width: 85px;">
+                <span style="font-weight: 600; color: var(--text-muted);">até</span>
+                <input type="number" id="cfg-max-avancado" class="form-control" step="0.1" min="0" max="10" value="10.0" style="font-weight: 700; width: 85px;">
+              </div>
+            </div>
+
+            <!-- Faixa: Adequado -->
+            <div style="background: #ffffff; border: 1px solid #bfdbfe; border-left: 5px solid #0284c7; border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-weight: 700; color: #0369a1; font-size: 0.95rem;">
+                  Nível Adequado
+                </label>
+                <span class="badge-status em-aplicacao">Adequado</span>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                Desenvolvimento satisfatório das competências e habilidades curriculares.
+              </p>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="number" id="cfg-min-adequado" class="form-control" step="0.1" min="0" max="10" value="7.0" style="font-weight: 700; width: 85px;">
+                <span style="font-weight: 600; color: var(--text-muted);">até</span>
+                <input type="number" id="cfg-max-adequado" class="form-control" step="0.1" min="0" max="10" value="7.9" style="font-weight: 700; width: 85px;">
+              </div>
+            </div>
+
+            <!-- Faixa: Básico -->
+            <div style="background: #ffffff; border: 1px solid #fde68a; border-left: 5px solid #d97706; border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-weight: 700; color: #92400e; font-size: 0.95rem;">
+                  Nível Básico
+                </label>
+                <span class="badge-status agendada">Básico</span>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                Atinge parcialmente as habilidades mínimas essenciais para a etapa.
+              </p>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="number" id="cfg-min-basico" class="form-control" step="0.1" min="0" max="10" value="6.0" style="font-weight: 700; width: 85px;">
+                <span style="font-weight: 600; color: var(--text-muted);">até</span>
+                <input type="number" id="cfg-max-basico" class="form-control" step="0.1" min="0" max="10" value="6.9" style="font-weight: 700; width: 85px;">
+              </div>
+            </div>
+
+            <!-- Faixa: Abaixo do Básico -->
+            <div style="background: #ffffff; border: 1px solid #fecaca; border-left: 5px solid #dc2626; border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-weight: 700; color: #991b1b; font-size: 0.95rem;">
+                  Abaixo do Básico (Intervenção)
+                </label>
+                <span class="badge-status intervencao">Abaixo do Básico</span>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                Estudante necessita de intervenção e apoio pedagógico imediato.
+              </p>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="number" id="cfg-min-abaixo" class="form-control" step="0.1" min="0" max="10" value="0.0" style="font-weight: 700; width: 85px;">
+                <span style="font-weight: 600; color: var(--text-muted);">até</span>
+                <input type="number" id="cfg-max-abaixo" class="form-control" step="0.1" min="0" max="10" value="5.9" style="font-weight: 700; width: 85px;">
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end;">
+            <button class="btn btn-primary" onclick="salvarParametrizacaoMediaNivel()">
+              Salvar Parametrização de Médias
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Aba 1.a: Seguranças -->
+      <div id="sub-config-seguranca" class="sub-config-content" style="display: none;">
+        <div class="content-card glass-panel" style="margin-bottom: 20px;">
+          <div class="content-card-header">
+            <h3>Políticas de Segurança & Conformidade LGPD</h3>
+            <span class="badge-tag primary">Ativo</span>
+          </div>
+
+          <div class="toggle-card-grid">
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Autenticação em Dois Fatores (2FA)</h4>
+                <p>Exigir código via SMS/E-mail para gestores e secretários.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sec-2fa" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Política de Senhas Fortes</h4>
+                <p>Mínimo 8 dígitos com números, letras maiúsculas e símbolos.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sec-senhas" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Bloqueio por Tentativas Incorretas</h4>
+                <p>Bloquear temporariamente após 5 erros sucessivos de senha.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sec-bloqueio" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Trilha de Auditoria e Logs Criptográficos</h4>
+                <p>Registrar todas as visualizações e emissões de boletins.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sec-auditoria" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Mascaramento de CPF / LGPD</h4>
+                <p>Ocultar dígitos centrais de CPFs para usuários sem privilégio total.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sec-mascaramento" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Backup Automático Diário em Nuvem</h4>
+                <p>Snapshot criptografado diário às 23:59 da base de Água Boa.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sec-backup" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAINEL DE TRILHA DE AUDITORIA LGPD (Art. 6º, VII) -->
+        <div class="content-card glass-panel" style="margin-bottom: 24px;">
+          <div class="content-card-header">
+            <div>
+              <h3>Trilha de Auditoria e Logs de Acesso LGPD</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                Registro imutável de operações sensíveis, exportações de relatórios e alterações cadastrais (Lei nº 13.709/2018).
+              </p>
+            </div>
+            <button class="btn btn-secondary" onclick="carregarLogsAuditoriaLGPD()" style="font-size: 0.8rem; padding: 4px 12px;">
+              Atualizar Logs
+            </button>
+          </div>
+
+          <div class="table-container" style="max-height: 280px; overflow-y: auto;">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>Data / Hora</th>
+                  <th>Usuário</th>
+                  <th>Perfil</th>
+                  <th>Operação</th>
+                  <th>Detalhes do Tratamento</th>
+                  <th>IP Origem</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-logs-auditoria-body">
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 16px;">
+                    Carregando trilha de auditoria...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin-top: 14px; padding: 12px 16px; background: rgba(0, 45, 98, 0.04); border-radius: 8px; border-left: 4px solid var(--gov-primary); font-size: 0.82rem; color: var(--text-muted);">
+            <strong>Aviso de Conformidade Legal:</strong> O Município de Água Boa - MT realiza o tratamento de dados de estudantes e profissionais da educação com fundamento no <strong>Art. 7º, III e Art. 23 da Lei nº 13.709/2018 (LGPD)</strong>, para a execução de políticas públicas e cumprimento de metas pedagógicas obrigatórias (LDB e Compromisso Nacional Criança Alfabetizada).
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Aba 1.b: Habilitar e Desabilitar Funcionalidades -->
+      <div id="sub-config-funcionalidades" class="sub-config-content" style="display: none;">
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Gestão de Módulos e Funcionalidades Ativas</h3>
+            <span class="badge-tag success">Controle em Tempo Real</span>
+          </div>
+
+          <div class="toggle-card-grid">
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Módulo Painel Geral (Dashboard)</h4>
+                <p>Visão consolidada de KPIs municipais e telemetria.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="func-dashboard" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Módulo de Avaliações Diagnósticas</h4>
+                <p>Agendamento e aplicação de testes diagnósticos e formativos.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="func-avaliacoes" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Módulo Central de Cadastros</h4>
+                <p>Gestão de Usuários, Escolas, Alunos, Turmas e Matrizes.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="func-cadastros" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Boletins Pedagógicos Online</h4>
+                <p>Acesso individualizado às matrizes de habilidades BNCC por estudante.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="func-boletins" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Exportação de Dados em CSV / Planilhas</h4>
+                <p>Permitir download dos relatórios tabulados para a SME.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="func-exportacao" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Integração em Tempo Real com SEDUC-MT / INEP</h4>
+                <p>Sincronização automática com a base estadual de Mato Grosso.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="func-seduc" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Aba 1.c: Sincronização da Rede, Exportação CSV e OpenAPI -->
+      <div id="sub-config-sincronizacao" class="sub-config-content" style="display: none;">
+        <div class="content-card glass-panel" style="margin-bottom: 24px;">
+          <div class="content-card-header">
+            <div>
+              <h3>Sincronização da Rede Municipal, Exportação de Dados e Documentação OpenAPI</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                Central de operação de sincronismo em tempo real da base educacional de Água Boa - MT, exportação consolidada em planilha CSV e documentação técnica REST.
+              </p>
+            </div>
+            <div class="status-pill" onclick="atualizarTodaPlataforma()" style="cursor: pointer;"
+              title="Clique para sincronizar e recarregar todos os componentes e dados">
+              <span class="pulse-dot"></span>
+              <span>Rede Sincronizada ↻</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 18px;">
+            <!-- Card 1: Rede Sincronizada -->
+            <div style="background: #ffffff; border: 1px solid #bbf7d0; border-left: 5px solid #16a34a; border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <strong style="color: #166534; font-size: 1rem;">1. Status e Sincronização da Rede</strong>
+                  <span class="badge-status ativo">Online • PostgreSQL</span>
+                </div>
+                <p style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5;">
+                  Recarrega todos os módulos, indicadores pedagógicos, cadastros de escolas/estudantes e configurações da rede municipal sem encerrar sua sessão ativa.
+                </p>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+                <div class="status-pill" onclick="atualizarTodaPlataforma()" style="cursor: pointer; margin: 0;"
+                  title="Clique para sincronizar e recarregar todos os componentes e dados">
+                  <span class="pulse-dot"></span>
+                  <span>Rede Sincronizada ↻</span>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="atualizarTodaPlataforma()" style="font-size: 0.82rem; padding: 8px 14px;">
+                  Sincronizar Agora ↻
+                </button>
+              </div>
+            </div>
+
+            <!-- Card 2: Exportar CSV -->
+            <div style="background: #ffffff; border: 1px solid #bfdbfe; border-left: 5px solid var(--gov-primary); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <strong style="color: var(--gov-primary); font-size: 1rem;">2. Exportação Consolidada (CSV)</strong>
+                  <span class="badge-tag primary">Planilha Oficial</span>
+                </div>
+                <p style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5;">
+                  Gera e faz o download da base consolidada de desempenho dos estudantes e escolas de Água Boa - MT em formato compatível com Microsoft Excel e LibreOffice Calc, com proteção contra injeção de fórmulas e registro na trilha LGPD.
+                </p>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+                <a href="/api/v1/exportar/csv" class="btn btn-secondary" style="font-weight: 700; color: var(--gov-primary); border-color: #93c5fd; padding: 8px 18px;" title="Exportar dados consolidados em planilha">
+                  Exportar CSV
+                </a>
+              </div>
+            </div>
+
+            <!-- Card 3: Documentação OpenAPI -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid #0284c7; border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <strong style="color: #0369a1; font-size: 1rem;">3. Especificação Técnica OpenAPI</strong>
+                  <span class="badge-status em-aplicacao">Swagger REST API</span>
+                </div>
+                <p style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5;">
+                  Acesse o catálogo interativo de endpoints RESTful (<code>/api/v1/*</code>), esquemas de validação Pydantic e contratos de interoperabilidade da Plataforma AVALIA AB.
+                </p>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+                <a href="/docs" target="_blank" class="btn btn-secondary" style="font-weight: 700; color: #0369a1; border-color: #7dd3fc; padding: 8px 18px;" title="Documentação Interativa Swagger API">
+                  OpenAPI
+                </a>
+              </div>
+            </div>
+
+            <!-- Card 4: Backup Total da Plataforma (.ZIP Portátil) -->
+            <div style="background: #ffffff; border: 1px solid #fde68a; border-left: 5px solid #d97706; border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <strong style="color: #92400e; font-size: 1rem;">4. Backup Total da Plataforma (.ZIP)</strong>
+                  <span class="badge-status agendada">Código + Banco</span>
+                </div>
+                <p style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5;">
+                  Pacote completo portátil contendo 100% do código-fonte, ativos visuais, instalador de 1 clique e banco de dados consolidado (<code>.db</code>, <code>.sql</code> e <code>.json</code>) pronto para restaurar em outra máquina.
+                </p>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+                <a href="/static/BACKUP_TOTAL_PLATAFORMA_AVALIA_AB_2026.zip" download="BACKUP_TOTAL_PLATAFORMA_AVALIA_AB_2026.zip" class="btn btn-primary" style="font-weight: 700; padding: 8px 18px;" title="Baixar pacote completo de Backup Total (.ZIP)">
+                  Baixar Backup Total (.ZIP)
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->

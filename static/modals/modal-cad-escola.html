@@ -1,0 +1,64 @@
+<!-- Modal: Cadastro / Edição de Escola (2.b) -->
+<div id="modal-cad-escola" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modal-cad-escola-titulo">Novo Cadastro de Escola</h3>
+      <button class="btn-close-modal" onclick="fecharModal('modal-cad-escola')">&times;</button>
+    </div>
+    <form id="form-cad-escola" onsubmit="salvarNovaEscola(event)">
+      <input type="hidden" id="cad-esc-id">
+      <div class="modal-row">
+        <div class="modal-form-group">
+          <label>Código da Escola (Sequencial)</label>
+          <input type="text" id="cad-esc-codigo" class="modal-input" placeholder="XXX (Sequencial)" readonly
+            style="background: #f1f5f9; font-family: monospace;">
+        </div>
+        <div class="modal-form-group">
+          <label>Telefone da Escola (XX XX X XXXX-XXXX)</label>
+          <input type="text" id="cad-esc-telefone" class="modal-input" placeholder="Ex: 66 34 6 8112-2200" required>
+        </div>
+      </div>
+
+      <div class="modal-form-group">
+        <label>Nome da Escola</label>
+        <input type="text" id="cad-esc-nome" class="modal-input" placeholder="Ex: EMEB São José Operário" required>
+      </div>
+
+      <div class="modal-row">
+        <div class="modal-form-group" style="flex: 2;">
+          <label>Endereço (Rua/Av.)</label>
+          <input type="text" id="cad-esc-endereco" class="modal-input" placeholder="Ex: Av. Planalto" required>
+        </div>
+        <div class="modal-form-group">
+          <label>Número</label>
+          <input type="text" id="cad-esc-numero" class="modal-input" placeholder="Ex: 1250" required>
+        </div>
+        <div class="modal-form-group">
+          <label>Bairro</label>
+          <input type="text" id="cad-esc-bairro" class="modal-input" placeholder="Ex: Centro" required>
+        </div>
+      </div>
+
+      <div class="modal-row">
+        <div class="modal-form-group">
+          <label>Código INEP (Opcional)</label>
+          <input type="text" id="cad-esc-inep" class="modal-input" placeholder="Ex: 51001299">
+        </div>
+        <div class="modal-form-group">
+          <label>Tipo de Polo / Zona</label>
+          <select id="cad-esc-tipo" class="modal-select">
+            <option value="Urbana">Urbana</option>
+            <option value="Campo">Polo do Campo (Rural)</option>
+            <option value="Indígena">Polo Indígena</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-cad-escola')">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-escola">Cadastrar Escola</button>
+      </div>
+    </form>
+  </div>
+
+</div>
