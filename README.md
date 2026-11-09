@@ -1,6 +1,12 @@
 # 🚀 AVALIA AB - Plataforma de Avaliação e Monitoramento da Educação
 ### Secretaria Municipal de Educação • Município de Água Boa - MT
 
+> 🌐 **ACESSO DIRETO À PLATAFORMA (CLIQUE ABAIXO PARA ENTRAR):**  
+> ### 👉 [CLIQUE AQUI PARA ABRIR A PLATAFORMA AVALIA AB](https://rlsouz.github.io/avalia-ab/) 👈
+> *(Ambiente web publicado com dados do Ciclo Avaliativo 2026 de Água Boa - MT)*
+
+---
+
 Plataforma educacional desenvolvida para a gestão, aplicação e análise de proficiência pedagógica das unidades escolares municipais (urbanas, polos rurais e indígenas) de Água Boa - MT.
 
 ---
