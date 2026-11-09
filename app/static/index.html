@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AVALIA AB - Plataforma de Avaliação e Monitoramento da Educação • Água Boa - MT</title>
+
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <!-- Tipografia Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Chart.js para BI e Gráficos Analíticos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Estilos da Plataforma AVALIA AB -->
+  <link rel="stylesheet" href="/static/style.css?v=38">
+</head>
+
+<body>
+
+  <!-- TELA INICIAL INSTITUCIONAL E PORTAL DE LOGON -->
+  <div id="modal-login-usuario" class="landing-portal-overlay active" data-bloqueado="true">
+    <div class="landing-portal-container">
+
+      <!-- COLUNA ESQUERDA: APRESENTAÇÃO INSTITUCIONAL DA PLATAFORMA AVALIA AB -->
+      <div class="landing-hero-panel">
+        <div>
+          <div class="landing-brand-header">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <div class="landing-logo-box">
+                <img src="/static/logo_avalia_ab_sharp.png" alt="Logo AVALIA AB">
+              </div>
+              <div class="landing-logo-box">
+                <img src="/static/logo_prefeitura_seduc.png" alt="Prefeitura de Água Boa - Secretaria Municipal de Educação">
+              </div>
+            </div>
+            <span class="landing-gov-badge">● Rede Municipal de Ensino • Água Boa - MT</span>
+          </div>
+
+          <h1 class="landing-hero-title">
+            Plataforma de Avaliação Diagnóstica e Monitoramento Educacional
+          </h1>
+
+          <p class="landing-hero-description">
+            A <strong>AVALIA AB</strong> é o sistema integrado da <strong>Secretaria Municipal de Educação de Água Boa - MT</strong> projetado para acompanhar o desenvolvimento pedagógico dos estudantes da rede municipal, consolidar indicadores de proficiência e apoiar a tomada de decisão pedagógica baseada em evidências.
+          </p>
+
+          <div class="landing-features-grid">
+            <div class="landing-feature-card">
+              <h4>Diagnóstico BNCC & SAEB</h4>
+              <p>Acompanhamento contínuo em Língua Portuguesa e Matemática (escala de 0 a 10 e proficiência), mapeando habilidades consolidadas e lacunas de aprendizagem.</p>
+            </div>
+            <div class="landing-feature-card">
+              <h4>Boletim Individualizado</h4>
+              <p>Emissão de boletins diagnósticos por estudante com registro personalizado de habilidades BNCC e parecer pedagógico de intervenção.</p>
+            </div>
+            <div class="landing-feature-card">
+              <h4>Gestão Escolar Unificada</h4>
+              <p>Controle centralizado de Unidades Escolares (Urbanas, do Campo e Indígenas), Turmas, Matriz Curricular, Estudantes e Equipe Pedagógica.</p>
+            </div>
+            <div class="landing-feature-card">
+              <h4>Inteligência de Dados & LGPD</h4>
+              <p>Painéis analíticos de Business Intelligence (BI), metas municipais e trilha de auditoria em conformidade com a LGPD (Art. 6º e Art. 46).</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="landing-hero-footer">
+          <span>Prefeitura Municipal de Água Boa - MT • Secretaria Municipal de Educação (SEDUC)</span>
+          <span>Ciclo Avaliativo 2026</span>
+        </div>
+      </div>
+
+      <!-- COLUNA DIREITA: CARTÃO DE LOGON PARA ACESSO À PLATAFORMA -->
+      <div class="landing-login-card">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 2px solid var(--gov-primary); padding-bottom: 12px;">
+            <div>
+              <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--gov-primary); margin: 0;">Acesso à Plataforma</h2>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0;">Identifique-se para entrar no ambiente de gestão educacional</p>
+            </div>
+            <button type="button" id="btn-fechar-modal-login" class="btn btn-secondary" onclick="fecharModalLoginUsuario()" style="padding: 4px 10px; font-size: 0.75rem; display: none;">
+              Voltar ao Painel
+            </button>
+          </div>
+
+          <form onsubmit="submeterLoginPlataforma(event)">
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="font-weight: 700; font-size: 0.84rem; color: var(--text-main);">Usuário (E-mail, CPF ou Código) *</label>
+              <input type="text" id="login-identificador" class="modal-input" placeholder="Digite seu E-mail, CPF ou Código (Ex: 0001)" required style="height: 42px;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label style="font-weight: 700; font-size: 0.84rem; color: var(--text-main); margin: 0;">Senha de Acesso</label>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <label style="font-size: 0.75rem; font-weight: 500; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 4px; margin: 0;">
+                    <input type="checkbox" onchange="document.getElementById('login-senha').type = this.checked ? 'text' : 'password'"> Mostrar senha
+                  </label>
+                  <button type="button" onclick="alternarBoxRedefinirSenha()" style="background: none; border: none; color: #0284c7; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 0;">
+                    Redefinir senha?
+                  </button>
+                </div>
+              </div>
+              <input type="password" id="login-senha" class="modal-input" placeholder="Digite sua senha de acesso" style="height: 42px;">
+              <small id="login-dica-senha" style="display: block; margin-top: 6px; font-size: 0.75rem; color: var(--text-muted);">
+                Informe seu E-mail, CPF ou Código de Usuário e sua senha para entrar.
+              </small>
+            </div>
+
+            <!-- BOX SEGURO DE ALTERAÇÃO DE SENHA (EXIGE SENHA ATUAL OU SESSÃO ADMIN) -->
+            <div id="box-redefinir-senha-login" style="display: none; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #0369a1; margin-bottom: 6px;">
+                Alterar Senha (Informe a senha atual e a nova senha de no mínimo 8 caracteres):
+              </label>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="password" id="login-senha-atual-redefinir" class="modal-input" placeholder="Senha atual do usuário">
+                <div style="display: flex; gap: 8px;">
+                  <input type="password" id="login-nova-senha-redefinir" class="modal-input" placeholder="Nova senha (mín. 8 caracteres)" style="flex: 1;">
+                  <button type="button" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.78rem;" onclick="confirmarRedefinicaoSenhaLogin()">
+                    Salvar Nova Senha
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="login-mensagem-erro" style="display: none; margin-top: 10px; margin-bottom: 10px; padding: 10px 12px; border-radius: 8px; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; font-size: 0.82rem; font-weight: 600;"></div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; height: 44px; font-size: 0.95rem; font-weight: 700; margin-top: 8px; justify-content: center;">
+              Entrar na Plataforma AVALIA AB ➔
+            </button>
+          </form>
+        </div>
+
+        <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-muted);">
+          <span>Ambiente Seguro • Controle RBAC</span>
+          <button type="button" id="btn-cancelar-modal-login" onclick="fecharModalLoginUsuario()" style="background: none; border: none; color: var(--gov-primary); font-weight: 700; cursor: pointer; display: none;">
+            Continuar com sessão atual ➔
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- HEADER PRINCIPAL COM IDENTIDADE DO MUNICÍPIO -->
+  <header class="app-header glass-panel">
+    <div class="header-top-row">
+      <!-- COLUNA ESQUERDA: LOGOMARCA DA PLATAFORMA AVALIA AB -->
+      <div class="header-brand">
+        <img src="/static/logo_avalia_ab_sharp.png?v=38" alt="Logo AVALIA AB" class="brand-logo-img" style="cursor: pointer;" onclick="abrirModalLoginUsuario(false)" title="Clique para ver a Tela Inicial de Apresentação / Logon">
+      </div>
+
+      <!-- COLUNA CENTRAL: FRASE INSTITUCIONAL, SESSÃO E HORÁRIO DE BRASÍLIA -->
+      <div class="header-center-panel">
+        <!-- TÍTULO INSTITUCIONAL DA PLATAFORMA -->
+        <h1 class="header-platform-title">
+          Plataforma de Avaliação e Monitoramento da Educação
+        </h1>
+
+        <!-- SESSÃO DO USUÁRIO AUTENTICADO E HORÁRIO OFICIAL DE BRASÍLIA -->
+        <div class="header-info-row">
+          <div id="pill-usuario-autenticado" class="header-pill-item header-pill-user">
+            <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Usuário:</span>
+            <strong id="nome-usuario-logado" style="font-size: 0.84rem; color: var(--gov-primary);">Administrador</strong>
+            <button type="button" class="btn btn-primary" onclick="abrirModalLoginUsuario(false)"
+              style="padding: 4px 12px; font-size: 0.75rem; border-radius: 14px; height: 26px;">
+              Trocar Usuário
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="realizarLogoutPlataforma()"
+              title="Encerrar sessão atual e voltar para a Tela Inicial de Logon"
+              style="padding: 4px 10px; font-size: 0.75rem; border-radius: 14px; height: 26px; color: var(--color-danger); border-color: #fecaca;">
+              Sair
+            </button>
+          </div>
+
+          <div id="pill-relogio-brasilia"
+            title="Horário Oficial de Brasília - Brasil (America/Sao_Paulo • UTC-3)"
+            class="header-pill-item" style="white-space: nowrap;">
+            <span style="color: var(--text-muted); font-weight: 600;">Brasília:</span>
+            <strong id="relogio-oficial-brasilia" style="font-family: monospace; font-size: 0.82rem; color: var(--gov-primary);">--/--/---- --:--:--</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUNA DIREITA: LOGOMARCA PREFEITURA DE ÁGUA BOA / SECRETARIA MUNICIPAL DE EDUCAÇÃO -->
+      <div class="header-institutional-brand">
+        <img src="/static/logo_prefeitura_seduc.png?v=38" alt="Prefeitura de Água Boa - Secretaria Municipal de Educação - Gestão 2025/2028" class="brand-logo-img brand-logo-prefeitura" title="Prefeitura Municipal de Água Boa - MT • Secretaria Municipal de Educação (Gestão 2025/2028)">
+      </div>
+    </div>
+
+    <!-- NAVEGAÇÃO SPA COMPLETA ABAIXO DA LOGOMARCA (SEM ÍCONES) -->
+    <nav class="header-nav header-nav-bar">
+      <button class="nav-tab-btn active" data-screen="dashboard">
+        Painel Geral
+      </button>
+      <button class="nav-tab-btn" data-screen="cadastros">
+        Cadastros
+      </button>
+      <button class="nav-tab-btn" data-screen="escolas">
+        Escolas
+      </button>
+      <button class="nav-tab-btn" data-screen="alunos">
+        Estudantes
+      </button>
+      <button class="nav-tab-btn" data-screen="notas">
+        Inserir Notas
+      </button>
+      <button class="nav-tab-btn" data-screen="relatorios">
+        BI & Relatórios
+      </button>
+      <button class="nav-tab-btn" data-screen="configuracoes">
+        Configurações
+      </button>
+    </nav>
+  </header>
+
+  <!-- CONTAINER PRINCIPAL DINÂMICO (INJETADO MODULARMENTE VIA /static/views/) -->
+  <main class="main-container">
+    <!-- ComponentLoader injeta as telas dinamicamente aqui -->
+    <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+      <div class="pulse-dot" style="margin: 0 auto 12px auto;"></div>
+      <p style="font-size: 0.9rem; font-weight: 600;">Carregando módulos educacionais de Água Boa...</p>
+    </div>
+  </main>
+
+  <!-- RODAPÉ OFICIAL DA PLATAFORMA AVALIA-AB -->
+  <footer class="app-footer" role="contentinfo">
+    <div class="app-footer-inner">
+      <span class="footer-brand">Plataforma <strong>Avalia-AB</strong> &copy; 2026</span>
+      <span class="footer-sep">&bull;</span>
+      <span class="footer-pref">Prefeitura Municipal de Água Boa - MT</span>
+      <span class="footer-sep">&bull;</span>
+      <span class="footer-seduc">Secretaria Municipal de Educação</span>
+      <span class="footer-sep">&bull;</span>
+      <span class="footer-hub">Hub de Inovação</span>
+    </div>
+  </footer>
+
+  <!-- CONTAINER DE MODAIS (INJETADOS MODULARMENTE VIA /static/modals/) -->
+  <div id="modals-container"></div>
+
+  <!-- CONTAINER DE NOTIFICAÇÕES TOAST -->
+  <div id="toast-container"></div>
+
+  <!-- LOADER DE COMPONENTES MODULARES -->
+  <script src="/static/js/loader.js?v=6"></script>
+
+  <!-- CONTROLADORES MODULARES DA APLICAÇÃO -->
+  <script src="/static/js/modules/state.js?v=35"></script>
+  <script src="/static/js/modules/cadastros.js?v=35"></script>
+  <script src="/static/js/modules/configuracoes.js?v=35"></script>
+  <script src="/static/js/modules/dashboard.js?v=35"></script>
+  <script src="/static/js/modules/avaliacoes.js?v=35"></script>
+  <script src="/static/js/modules/escolas.js?v=35"></script>
+  <script src="/static/js/modules/alunos.js?v=35"></script>
+  <script src="/static/js/modules/relatorios.js?v=35"></script>
+  <script src="/static/js/modules/modais.js?v=35"></script>
+  <script src="/static/js/modules/notas.js?v=35"></script>
+
+  <!-- ORQUESTRADOR E INICIALIZADOR PRINCIPAL -->
+  <script src="/static/app.js?v=35"></script>
+</body>
+
+</html>

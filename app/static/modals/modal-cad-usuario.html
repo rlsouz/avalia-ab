@@ -1,0 +1,79 @@
+  <!-- Modal: Cadastro / Edição de Usuário (2.a) -->
+  <div id="modal-cad-usuario" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-cad-usuario-titulo">Novo Cadastro de Usuário</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-cad-usuario')">&times;</button>
+      </div>
+      <form id="form-cad-usuario" onsubmit="salvarNovoUsuario(event)">
+        <input type="hidden" id="cad-usu-id">
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Código do Usuário (Sequencial)</label>
+            <input type="text" id="cad-usu-codigo" class="modal-input" placeholder="XXXX (Sequencial)" readonly style="background: #f1f5f9; font-family: monospace;">
+          </div>
+          <div class="modal-form-group">
+            <label>CPF (XXX.XXX.XXX - XX)</label>
+            <input type="text" id="cad-usu-cpf" class="modal-input" placeholder="Ex: 123.456.789 - 00" required>
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Nome Completo</label>
+          <input type="text" id="cad-usu-nome" class="modal-input" placeholder="Ex: Maria Pereira Silva" required>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Perfil de Acesso / Permissões (RBAC)</label>
+            <select id="cad-usu-perfil" class="modal-select" required>
+              <option value="admin">Administrador (SEDUC / TI)</option>
+              <option value="coordenador">Coordenador Pedagógico</option>
+              <option value="diretor">Diretor / Secretário</option>
+              <option value="professor">Professor / Docente</option>
+            </select>
+          </div>
+          <div class="modal-form-group">
+            <label>Telefone (XX XX X XXXX-XXXX)</label>
+            <input type="text" id="cad-usu-telefone" class="modal-input" placeholder="Ex: 66 99 9 9876-5432" required>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Endereço Completo</label>
+            <input type="text" id="cad-usu-endereco" class="modal-input" placeholder="Ex: Av. Araguaia, nº 500 - Centro, Água Boa - MT" required>
+          </div>
+          <div class="modal-form-group">
+            <label>E-mail Institucional</label>
+            <input type="email" id="cad-usu-email" class="modal-input" placeholder="Ex: usuario@aguaboa.mt.gov.br" required>
+          </div>
+        </div>
+
+        <!-- Campos de Senha de Acesso com Alternância de Visibilidade -->
+        <div class="modal-row" style="background: rgba(0, 45, 98, 0.03); border: 1px solid rgba(0, 45, 98, 0.1); border-radius: 8px; padding: 12px 14px; margin-top: 6px;">
+          <div class="modal-form-group" style="position: relative;">
+            <label id="label-cad-usu-senha">Senha de Acesso ao Sistema</label>
+            <div style="position: relative;">
+              <input type="password" id="cad-usu-senha" class="modal-input" placeholder="Mínimo de 6 dígitos" minlength="6" style="padding-right: 40px;">
+              <button type="button" onclick="alternarVisibilidadeSenha('cad-usu-senha', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1rem; color: var(--text-dim);" title="Mostrar / Ocultar Senha">👁️</button>
+            </div>
+            <span id="hint-cad-usu-senha" style="font-size: 0.73rem; color: var(--text-dim); margin-top: 3px; display: block;"></span>
+          </div>
+          <div class="modal-form-group" style="position: relative;">
+            <label>Confirmar Senha</label>
+            <div style="position: relative;">
+              <input type="password" id="cad-usu-senha-confirma" class="modal-input" placeholder="Repita a senha digitada" minlength="6" style="padding-right: 40px;">
+              <button type="button" onclick="alternarVisibilidadeSenha('cad-usu-senha-confirma', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1rem; color: var(--text-dim);" title="Mostrar / Ocultar Senha">👁️</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-cad-usuario')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-usuario">Salvar Usuário</button>
+        </div>
+      </form>
+    </div>
+
+  </div>

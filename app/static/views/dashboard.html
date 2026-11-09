@@ -1,0 +1,103 @@
+    <div id="screen-dashboard" class="screen-view">
+      <div class="screen-header">
+        <div>
+          <h2>Painel Geral de Avaliação Educacional</h2>
+          <p class="section-desc">Métricas consolidadas do ciclo avaliativo, metas municipais e alertas pedagógicos de Água Boa - MT.</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-secondary" onclick="carregarTodasMetricas()">
+            Atualizar Dados
+          </button>
+        </div>
+      </div>
+
+      <!-- CARDS DE KPIS EXECUTIVOS COM CORES VIBRANTES DE ALTO IMPACTO -->
+      <section class="metrics-grid">
+        <div class="metric-card card-vibrant-blue">
+          <div class="metric-header">
+            <span class="metric-label">Estudantes Matriculados</span>
+          </div>
+          <h3 class="metric-value" id="kpi-alunos">4.820</h3>
+          <span class="metric-sub"><span class="trend-up">●</span> 100% da rede cadastrada no Censo Escolar</span>
+        </div>
+
+        <div class="metric-card card-vibrant-green">
+          <div class="metric-header">
+            <span class="metric-label">Taxa de Participação</span>
+          </div>
+          <h3 class="metric-value" id="kpi-participacao">95.6%</h3>
+          <span class="metric-sub"><span class="trend-up">+2.4%</span> Acima da meta do Compromisso Criança Alfabetizada</span>
+        </div>
+
+        <div class="metric-card card-vibrant-purple">
+          <div class="metric-header">
+            <span class="metric-label">Nota Média Língua Portuguesa (0 a 10)</span>
+          </div>
+          <h3 class="metric-value" id="kpi-lp">7,8</h3>
+          <span class="metric-sub" id="kpi-lp-sub">Língua Portuguesa • Meta 2026: 8,0</span>
+        </div>
+
+        <div class="metric-card card-vibrant-amber">
+          <div class="metric-header">
+            <span class="metric-label">Nota Média Matemática (0 a 10)</span>
+          </div>
+          <h3 class="metric-value" id="kpi-mat">8,1</h3>
+          <span class="metric-sub" id="kpi-mat-sub">Matemática • Meta 2026: 8,2</span>
+        </div>
+      </section>
+
+      <!-- GRIDS DO DASHBOARD COM GRÁFICOS E ALERTAS -->
+      <div class="dashboard-grid-2cols">
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Evolução das Notas Médias Municipais (Escala 0 a 10)</h3>
+            <span class="badge-tag primary">2023 - 2026</span>
+          </div>
+          <div class="chart-box">
+            <canvas id="chartEvolucaoHistorica"></canvas>
+          </div>
+        </div>
+
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Padrões de Aprendizagem</h3>
+            <span class="badge-tag success">Ciclo Atual</span>
+          </div>
+          <div class="chart-box">
+            <canvas id="chartDistribuicaoNiveis"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid-2cols">
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Alertas Pedagógicos Prioritários da Rede</h3>
+            <span class="badge-tag warning">Ação SME</span>
+          </div>
+          <div class="pedagogic-alerts-list" id="lista-alertas-pedagogicos"></div>
+        </div>
+
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Unidades da Rede Municipal</h3>
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="trocarTela('escolas')">Ver Todas (9)</button>
+          </div>
+          <div class="table-container">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>Escola</th>
+                  <th>Alunos</th>
+                  <th>Média LP/MAT</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-resumo-escolas"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA: CADASTROS DA PLATAFORMA -->

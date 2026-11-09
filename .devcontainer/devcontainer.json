@@ -1,0 +1,17 @@
+{
+  "name": "avaliacaoemonitoramentomatogrosso_caeddigital_net (Antigravity Ready)",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "golang.Go",
+        "Dart-Code.flutter"
+      ]
+    }
+  },
+  "forwardPorts": [
+    8080,
+    3000
+  ]
+}

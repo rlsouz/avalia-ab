@@ -1,0 +1,48 @@
+  <!-- Modal: Editar Nota do Estudante -->
+  <div id="modal-editar-nota-aluno" class="modal-overlay">
+    <div class="modal-content" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3>Lançamento e Edição de Notas do Estudante</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-editar-nota-aluno')">&times;</button>
+      </div>
+
+      <form id="form-editar-nota-modal" onsubmit="salvarNotaModalAluno(event)">
+        <input type="hidden" id="edit-modal-aluno-id">
+
+        <div style="background: var(--bg-surface-secondary); padding: 14px; border-radius: 10px; margin-bottom: 18px; border: 1px solid var(--border-light);">
+          <div style="font-size: 1.05rem; font-weight: 700; color: var(--gov-primary);" id="edit-modal-aluno-nome">Nome do Aluno</div>
+          <div style="display: flex; gap: 16px; font-size: 0.82rem; color: var(--text-muted); margin-top: 6px;">
+            <span>Escola: <strong id="edit-modal-aluno-escola" style="color: var(--text-main);">-</strong></span>
+            <span>Turma: <strong id="edit-modal-aluno-turma" style="color: var(--text-main);">-</strong></span>
+            <span>Cód: <strong id="edit-modal-aluno-cod" style="color: var(--gov-primary);">-</strong></span>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Ano Letivo</label>
+            <input type="text" id="edit-modal-ano-letivo" class="modal-input" value="2026" readonly style="background: #f1f5f9;">
+          </div>
+          <div class="modal-form-group">
+            <label>Português - LP (0 a 10)</label>
+            <input type="text" id="edit-modal-nota-lp" class="modal-input" placeholder="Ex: 7,5 ou 8.5" required>
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Matemática - MAT (0 a 10)</label>
+          <input type="text" id="edit-modal-nota-mat" class="modal-input" placeholder="Ex: 8,0 ou 9.0" required>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Observação Pedagógica / Parecer (Opcional)</label>
+          <input type="text" id="edit-modal-obs" class="modal-input" placeholder="Ex: Excelente evolução na interpretação de texto...">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-editar-nota-aluno')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Nota</button>
+        </div>
+      </form>
+    </div>
+  </div>

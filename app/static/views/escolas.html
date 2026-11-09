@@ -1,0 +1,64 @@
+    <div id="screen-escolas" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Rede Municipal de Ensino de Água Boa - MT</h2>
+          <p class="section-desc">Diretório de Unidades Escolares, polos urbanos, do campo e indígenas com gestão de turmas e enturmações.</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-primary" onclick="abrirModalCadEscola()">
+            Cadastrar Escola
+          </button>
+        </div>
+      </div>
+
+      <!-- BARRA DE CONTROLE: BUSCA, FILTRO E ORDENAR (LISTA / CARTÕES) -->
+      <div class="view-control-toolbar">
+        <div class="view-control-left">
+          <input type="text" id="busca-escola" placeholder="Buscar por nome da escola ou bairro..." class="search-input" onkeyup="filtrarEscolasCards(this.value)">
+          <select id="filtro-zona-escolas" class="filter-select" onchange="filtrarEscolasPorZona(this.value)">
+            <option value="todos">Todas as Zonas</option>
+            <option value="Urbana">Zona Urbana</option>
+            <option value="Campo">Polo do Campo (Rural)</option>
+            <option value="Indígena">Polo Indígena</option>
+          </select>
+          <select id="ordem-escolas" class="filter-select" onchange="ordenarEscolas(this.value)">
+            <option value="padrao">Ordenar: Código Sequencial</option>
+            <option value="nome-asc">Nome da Escola (A - Z)</option>
+            <option value="alunos-desc">Maior Nº de Alunos</option>
+            <option value="nota-desc">Maior Nota Média</option>
+          </select>
+        </div>
+        <div class="view-control-right">
+          <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-dim);">Exibição:</span>
+          <div class="view-mode-toggle">
+            <button class="view-mode-btn" id="btn-view-esc-lista" onclick="alternarModoExibicaoEscolas('lista')">Lista</button>
+            <button class="view-mode-btn active" id="btn-view-esc-cards" onclick="alternarModoExibicaoEscolas('cartoes')">Em Cartão</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-rede-escolas-lista" class="table-container glass-panel" style="display: none;">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nome da Escola</th>
+              <th>Zona / Polo</th>
+              <th>Endereço Completo</th>
+              <th>Telefone</th>
+              <th>INEP</th>
+              <th>Turmas</th>
+              <th>Alunos</th>
+              <th>Participação</th>
+              <th>Média</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-escolas-body"></tbody>
+        </table>
+      </div>
+
+      <div class="directory-cards-grid" id="grid-escolas-cards"></div>
+    </div>
+
+    <!-- ========================================== -->

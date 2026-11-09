@@ -1,0 +1,256 @@
+    <div id="screen-cadastros" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Módulo Central de Cadastros Educacionais</h2>
+          <p class="section-desc">Gerenciamento nominal e estrutural de Usuários, Escolas, Alunos, Turmas e Matriz Curricular de Água Boa - MT.</p>
+        </div>
+        <div class="section-actions" id="cadastros-top-actions">
+          <!-- Botão dinâmico injetado de acordo com a sub-aba ativa -->
+        </div>
+      </div>
+
+      <!-- SUB-ABAS DE CADASTROS -->
+      <nav class="sub-nav-tabs">
+        <button class="sub-tab-btn active" data-sub="usuarios" onclick="trocarSubAbaCadastro('usuarios')">
+          Usuários
+        </button>
+        <button class="sub-tab-btn" data-sub="escolas" onclick="trocarSubAbaCadastro('escolas')">
+          Escolas
+        </button>
+        <button class="sub-tab-btn" data-sub="turmas" onclick="trocarSubAbaCadastro('turmas')">
+          Turmas
+        </button>
+        <button class="sub-tab-btn" data-sub="alunos" onclick="trocarSubAbaCadastro('alunos')">
+          Alunos
+        </button>
+        <button class="sub-tab-btn" data-sub="matriz" onclick="trocarSubAbaCadastro('matriz')">
+          Matriz Curricular
+        </button>
+      </nav>
+
+      <!-- BARRA DE CONTROLE: BUSCA, ORDENAÇÃO E ALTERNAR MODO (LISTA / CARTÕES) -->
+      <div class="view-control-toolbar">
+        <div class="view-control-main-row">
+          <div class="view-control-left">
+            <input type="text" id="busca-cadastros" placeholder="Buscar registros neste cadastro..." class="search-input" oninput="filtrarCadastrosGenerico(this.value)">
+            <select id="ordem-cadastros" class="filter-select" onchange="ordenarCadastrosGenerico(this.value)">
+              <option value="padrao">Ordenar: Código Sequencial</option>
+              <option value="nome-asc">Nome / Descrição (A - Z)</option>
+              <option value="nome-desc">Nome / Descrição (Z - A)</option>
+            </select>
+          </div>
+          <div class="view-control-right">
+            <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-dim);">Exibição:</span>
+            <div class="view-mode-toggle">
+              <button class="view-mode-btn active" id="btn-view-lista" onclick="alternarModoExibicaoCadastros('lista')">Lista</button>
+              <button class="view-mode-btn" id="btn-view-cards" onclick="alternarModoExibicaoCadastros('cartoes')">Em Cartão</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros específicos para a sub-aba de Usuários -->
+        <div id="filtros-especificos-usuarios" class="filters-dynamic-grid" style="display: none;">
+          <select id="filtro-cad-usu-codigo" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Códigos</option>
+          </select>
+          <select id="filtro-cad-usu-nome" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Nomes</option>
+          </select>
+          <select id="filtro-cad-usu-cpf" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os CPFs</option>
+          </select>
+          <select id="filtro-cad-usu-endereco" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Endereços</option>
+          </select>
+          <select id="filtro-cad-usu-telefone" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Telefones</option>
+          </select>
+          <select id="filtro-cad-usu-email" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os E-mails</option>
+          </select>
+          <select id="filtro-cad-usu-status" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Status</option>
+            <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
+          </select>
+        </div>
+
+        <!-- Filtros específicos para a sub-aba de Escolas -->
+        <div id="filtros-especificos-escolas" class="filters-dynamic-grid" style="display: none;">
+          <select id="filtro-cad-esc-codigo" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Códigos</option>
+          </select>
+          <select id="filtro-cad-esc-nome" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todas as Escolas</option>
+          </select>
+          <select id="filtro-cad-esc-endereco" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Endereços</option>
+          </select>
+        </div>
+
+        <!-- Filtros específicos para a sub-aba de Turmas -->
+        <div id="filtros-especificos-turmas" class="filters-dynamic-grid" style="display: none;">
+          <select id="filtro-cad-tur-escola" class="filter-select" onchange="aoMudarFiltroEscolaCadTurmas(this.value)">
+            <option value="todos">Todas as Escolas</option>
+          </select>
+          <select id="filtro-cad-tur-periodo" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Períodos</option>
+          </select>
+          <select id="filtro-cad-tur-modalidade" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todas as Modalidades</option>
+          </select>
+          <select id="filtro-cad-tur-etapa" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todas as Etapas</option>
+          </select>
+          <select id="filtro-cad-tur-turno" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Turnos</option>
+            <option value="Matutino">Matutino</option>
+            <option value="Vespertino">Vespertino</option>
+            <option value="Integral">Integral</option>
+          </select>
+          <select id="filtro-cad-tur-sala" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todas as Salas</option>
+          </select>
+        </div>
+
+        <!-- Filtros específicos para a sub-aba de Alunos -->
+        <div id="filtros-especificos-alunos" class="filters-dynamic-grid" style="display: none;">
+          <select id="filtro-cad-alu-escola" class="filter-select" onchange="aoMudarFiltroEscolaCadAlunos(this.value)">
+            <option value="todos">Todas as Escolas</option>
+          </select>
+          <select id="filtro-cad-alu-turma" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todas as Turmas</option>
+          </select>
+          <select id="filtro-cad-alu-sala" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todas as Salas</option>
+          </select>
+          <select id="filtro-cad-alu-turno" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Turnos</option>
+            <option value="Matutino">Matutino</option>
+            <option value="Vespertino">Vespertino</option>
+            <option value="Integral">Integral</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- CONTEÚDOS DAS SUB-ABAS DE CADASTROS -->
+      
+      <!-- Sub-Aba a: Usuários -->
+      <div id="sub-cadastro-usuarios" class="sub-cadastro-content">
+        <div id="view-usuarios-lista" class="table-container glass-panel">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Código (XXXX)</th>
+                <th>Nome Completo</th>
+                <th>CPF</th>
+                <th>Perfil (RBAC)</th>
+                <th>Endereço</th>
+                <th>Telefone</th>
+                <th>E-mail</th>
+                <th>Status</th>
+                <th style="text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-cad-usuarios-body"></tbody>
+          </table>
+        </div>
+        <div id="view-usuarios-cartoes" class="cards-view-grid" style="display: none;"></div>
+      </div>
+
+      <!-- Sub-Aba b: Escola -->
+      <div id="sub-cadastro-escolas" class="sub-cadastro-content" style="display: none;">
+        <div id="view-escolas-lista" class="table-container glass-panel">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Código (XXX)</th>
+                <th>Nome da Escola</th>
+                <th>Endereço</th>
+                <th>Número</th>
+                <th>Bairro</th>
+                <th>Telefone</th>
+                <th>INEP</th>
+                <th>Total Alunos</th>
+                <th style="text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-cad-escolas-body"></tbody>
+          </table>
+        </div>
+        <div id="view-escolas-cartoes" class="cards-view-grid" style="display: none;"></div>
+      </div>
+
+      <!-- Sub-Aba c: Aluno -->
+      <div id="sub-cadastro-alunos" class="sub-cadastro-content" style="display: none;">
+        <div id="view-alunos-lista" class="table-container glass-panel">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Cód. Escola</th>
+                <th>Nome da Escola</th>
+                <th>Cód. Aluno (XXXX)</th>
+                <th>INEP</th>
+                <th>Nome do Estudante</th>
+                <th>Nome do Responsável</th>
+                <th>Endereço</th>
+                <th>Telefone Responsável</th>
+                <th>Turma</th>
+                <th>Sala</th>
+                <th>Turno</th>
+                <th style="text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-cad-alunos-body"></tbody>
+          </table>
+        </div>
+        <div id="view-alunos-cartoes" class="cards-view-grid" style="display: none;"></div>
+      </div>
+
+      <!-- Sub-Aba e: Turma -->
+      <div id="sub-cadastro-turmas" class="sub-cadastro-content" style="display: none;">
+        <div id="view-turmas-lista" class="table-container glass-panel">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Cód. Escola</th>
+                <th>Nome da Escola</th>
+                <th>Período Letivo</th>
+                <th>Modalidade</th>
+                <th>Etapa</th>
+                <th>Turma</th>
+                <th>Turno</th>
+                <th>Sala</th>
+                <th>Total Alunos</th>
+                <th style="text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-cad-turmas-body"></tbody>
+          </table>
+        </div>
+        <div id="view-turmas-cartoes" class="cards-view-grid" style="display: none;"></div>
+      </div>
+
+      <!-- Sub-Aba f: Matriz Curricular -->
+      <div id="sub-cadastro-matriz" class="sub-cadastro-content" style="display: none;">
+        <div id="view-matriz-lista" class="table-container glass-panel">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Cód. Escola</th>
+                <th>Nome da Escola</th>
+                <th>Turma</th>
+                <th>Sala</th>
+                <th>Turno</th>
+                <th>Disciplina</th>
+                <th style="text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-cad-matriz-body"></tbody>
+          </table>
+        </div>
+        <div id="view-matriz-cartoes" class="cards-view-grid" style="display: none;"></div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->

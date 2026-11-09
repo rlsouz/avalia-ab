@@ -1,0 +1,22 @@
+databases:
+  - name: avalia-ab-postgres
+    databaseName: avalia_ab
+    user: avalia_ab_user
+    plan: free
+
+services:
+  - type: web
+    name: plataforma-avalia-ab
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --no-server-header --proxy-headers
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.8
+      - key: AVALIA_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: avalia-ab-postgres
+          property: connectionString

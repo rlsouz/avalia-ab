@@ -1,0 +1,84 @@
+    <div id="screen-alunos" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Quadro Geral de Estudantes</h2>
+          <p class="section-desc">Consulta nominal de estudantes, registros de frequência, níveis de aprendizagem e emissão de boletins pedagógicos.</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-primary" onclick="abrirModalCadAluno()">
+            Novo Aluno
+          </button>
+        </div>
+      </div>
+
+      <!-- BARRA DE CONTROLE: BUSCA, FILTRO E ORDENAR (LISTA / CARTÕES) -->
+      <div class="view-control-toolbar">
+        <div class="view-control-main-row">
+          <div class="view-control-left">
+            <input type="text" id="busca-estudante" placeholder="Buscar por Nome do Aluno, Cód. Aluno ou Turma..." class="search-input" onkeyup="filtrarAlunosTabela(this.value)">
+            <select id="ordem-alunos" class="filter-select" onchange="ordenarAlunos(this.value)">
+              <option value="padrao">Ordenar: Código</option>
+              <option value="nome-asc">Nome do Aluno (A - Z)</option>
+              <option value="media-desc">Maior Média Geral</option>
+              <option value="media-asc">Menor Média Geral</option>
+            </select>
+          </div>
+          <div class="view-control-right">
+            <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-dim);">Exibição:</span>
+            <div class="view-mode-toggle">
+              <button class="view-mode-btn active" id="btn-view-alu-lista" onclick="alternarModoExibicaoAlunos('lista')">Lista</button>
+              <button class="view-mode-btn" id="btn-view-alu-cards" onclick="alternarModoExibicaoAlunos('cartoes')">Em Cartão</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="filters-dynamic-grid">
+          <select id="filtro-escola-alunos" class="filter-select" onchange="aoMudarFiltroEscolaEstudantes(this.value)">
+            <option value="todos">Todas as Escolas</option>
+          </select>
+          <select id="filtro-turma-alunos" class="filter-select" onchange="filtrarAlunosTabela()">
+            <option value="todos">Todas as Turmas</option>
+          </select>
+          <select id="filtro-sala-alunos" class="filter-select" onchange="filtrarAlunosTabela()">
+            <option value="todos">Todas as Salas</option>
+          </select>
+          <select id="filtro-turno-alunos" class="filter-select" onchange="filtrarAlunosTabela()">
+            <option value="todos">Todos os Turnos</option>
+            <option value="Matutino">Matutino</option>
+            <option value="Vespertino">Vespertino</option>
+            <option value="Integral">Integral</option>
+          </select>
+          <select id="filtro-nivel-alunos" class="filter-select" onchange="filtrarAlunosPorNivel(this.value)">
+            <option value="todos">Todos os Níveis</option>
+            <option value="Avançado">Avançado</option>
+            <option value="Adequado">Adequado</option>
+            <option value="Básico">Básico</option>
+            <option value="Abaixo do Básico">Abaixo do Básico</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="view-quadro-alunos-lista" class="table-container glass-panel">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Cód. Aluno</th>
+              <th>Nome do Estudante</th>
+              <th>Unidade Escolar</th>
+              <th>Turma</th>
+              <th>Frequência</th>
+              <th>Nota LP (0-10)</th>
+              <th>Nota MAT (0-10)</th>
+              <th>Média Geral</th>
+              <th>Nível / Desempenho</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-alunos-body"></tbody>
+        </table>
+      </div>
+
+      <div id="view-quadro-alunos-cartoes" class="cards-view-grid" style="display: none;"></div>
+    </div>
+
+    <!-- ========================================== -->

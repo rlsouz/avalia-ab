@@ -1,0 +1,71 @@
+    <div id="screen-avaliacoes" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Gestão de Avaliações Diagnósticas e Formativas</h2>
+          <p class="section-desc">Planejamento, aplicação e acompanhamento de instrumentos avaliativos na rede municipal de Água Boa.</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-primary" onclick="abrirModalNovaAvaliacao()">
+            Nova Avaliação
+          </button>
+        </div>
+      </div>
+
+      <!-- BARRA DE CONTROLE: BUSCA, FILTRO E ORDENAR (LISTA / CARTÕES) -->
+      <div class="view-control-toolbar">
+        <div class="view-control-left">
+          <input type="text" id="busca-avaliacoes" placeholder="Buscar por código, título ou ano escolar..." class="search-input" oninput="filtrarAvaliacoes()">
+          <select id="filtro-comp-avaliacoes" class="filter-select" onchange="filtrarAvaliacoes()">
+            <option value="todos">Todos os Componentes</option>
+            <option value="Língua Portuguesa">Língua Portuguesa</option>
+            <option value="Matemática">Matemática</option>
+            <option value="Ciências da Natureza">Ciências da Natureza</option>
+            <option value="Fluência em Leitura">Fluência em Leitura</option>
+          </select>
+          <select id="filtro-status-avaliacoes" class="filter-select" onchange="filtrarAvaliacoes()">
+            <option value="todos">Todos os Status</option>
+            <option value="Concluída">Concluídas</option>
+            <option value="Em Aplicação">Em Aplicação</option>
+            <option value="Agendada">Agendadas</option>
+          </select>
+          <select id="ordem-avaliacoes" class="filter-select" onchange="ordenarAvaliacoes(this.value)">
+            <option value="padrao">Ordenar: Padrão</option>
+            <option value="titulo-asc">Título (A - Z)</option>
+            <option value="participacao-desc">Maior Participação</option>
+            <option value="media-desc">Maior Média</option>
+          </select>
+        </div>
+        <div class="view-control-right">
+          <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-dim);">Exibição:</span>
+          <div class="view-mode-toggle">
+            <button class="view-mode-btn active" id="btn-view-ava-lista" onclick="alternarModoExibicaoAvaliacoes('lista')">Lista</button>
+            <button class="view-mode-btn" id="btn-view-ava-cards" onclick="alternarModoExibicaoAvaliacoes('cartoes')">Em Cartão</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-avaliacoes-lista" class="table-container glass-panel">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Instrumento Avaliativo</th>
+              <th>Componente</th>
+              <th>Ano/Série</th>
+              <th>Tipo</th>
+              <th>Período</th>
+              <th>Avaliados / Total</th>
+              <th>Taxa</th>
+              <th>Média SAEB</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-avaliacoes-body"></tbody>
+        </table>
+      </div>
+
+      <div id="view-avaliacoes-cartoes" class="cards-view-grid" style="display: none;"></div>
+    </div>
+
+    <!-- ========================================== -->

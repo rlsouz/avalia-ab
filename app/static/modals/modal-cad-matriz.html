@@ -1,0 +1,57 @@
+  <!-- Modal: Cadastro / Edição de Matriz Curricular (2.f) -->
+  <div id="modal-cad-matriz" class="modal-overlay">
+    <div class="modal-content" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 id="modal-cad-matriz-titulo">Nova Disciplina / Matriz Curricular</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-cad-matriz')">&times;</button>
+      </div>
+      <form id="form-cad-matriz" onsubmit="salvarNovaMatriz(event)">
+        <input type="hidden" id="cad-mat-id">
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Código da Escola (XXX)</label>
+            <input type="text" id="cad-mat-escola-cod" class="modal-input" placeholder="Ex: 001" readonly style="background: #f1f5f9; font-family: monospace;">
+          </div>
+          <div class="modal-form-group">
+            <label>Nome da Escola</label>
+            <select id="cad-mat-escola-select" class="modal-select" onchange="aoMudarEscolaMatriz(this.value)" required>
+              <!-- Preenchido via JS com as escolas cadastradas -->
+            </select>
+          </div>
+        </div>
+
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Turma</label>
+            <select id="cad-mat-turma-select" class="modal-select" onchange="aoMudarTurmaMatriz(this.value)" required>
+              <!-- Preenchido via JS com as turmas cadastradas -->
+            </select>
+          </div>
+          <div class="modal-form-group">
+            <label>Sala</label>
+            <input type="text" id="cad-mat-sala" class="modal-input" placeholder="Ex: Sala 04" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Turno</label>
+            <select id="cad-mat-turno" class="modal-select">
+              <option value="Matutino">Matutino</option>
+              <option value="Vespertino">Vespertino</option>
+              <option value="Integral">Integral</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Nome da Disciplina</label>
+          <input type="text" id="cad-mat-nome" class="modal-input" placeholder="Ex: Língua Portuguesa" required>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-cad-matriz')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-matriz">Salvar Disciplina</button>
+        </div>
+      </form>
+    </div>
+
+  </div>

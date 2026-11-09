@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  db_postgres:
+    image: postgres:16-alpine
+    container_name: avalia_ab_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-avalia_ab}
+    # Porta 5432 restrita exclusivamente ao loopback local (bloqueada para varreduras externas)
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      - avalia_internal_net
+    volumes:
+      - pgdata_avalia_ab:/var/lib/postgresql/data
+
+  avaliacaoemonitoramentomatogrosso_caeddigital_net:
+    build: .
+    depends_on:
+      - db_postgres
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db_postgres:5432/${POSTGRES_DB:-avalia_ab}
+    ports:
+      - "8080:8080"
+    networks:
+      - avalia_internal_net
+    volumes:
+      - ./app:/app/app
+    restart: unless-stopped
+
+networks:
+  avalia_internal_net:
+    driver: bridge
+
+volumes:
+  pgdata_avalia_ab:

@@ -1,0 +1,79 @@
+  <!-- Modal: Nova Avaliação Diagnóstica -->
+  <div id="modal-nova-avaliacao" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Agendar Nova Avaliação Diagnóstica / Formativa</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-nova-avaliacao')">&times;</button>
+      </div>
+      <form id="form-nova-avaliacao" onsubmit="salvarNovaAvaliacao(event)">
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Código da Avaliação</label>
+            <input type="text" id="nova-ava-codigo" class="modal-input" placeholder="Ex: DIAG-2026-MAT2" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Componente Curricular</label>
+            <select id="nova-ava-componente" class="modal-select" required>
+              <option value="Língua Portuguesa">Língua Portuguesa</option>
+              <option value="Matemática">Matemática</option>
+              <option value="Ciências da Natureza">Ciências da Natureza</option>
+              <option value="Fluência em Leitura">Fluência em Leitura</option>
+              <option value="História & Geografia">História & Geografia</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Título Completo do Instrumento</label>
+          <input type="text" id="nova-ava-titulo" class="modal-input" placeholder="Ex: 2ª Avaliação Formativa de Matemática - Água Boa" required>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Ano / Série Escolar</label>
+            <select id="nova-ava-ano" class="modal-select" required>
+              <option value="2º Ano EF">2º Ano EF (Alfabetização)</option>
+              <option value="3º Ano EF">3º Ano EF</option>
+              <option value="4º Ano EF">4º Ano EF</option>
+              <option value="5º Ano EF" selected>5º Ano EF (Anos Iniciais)</option>
+              <option value="6º Ano EF">6º Ano EF</option>
+              <option value="7º Ano EF">7º Ano EF</option>
+              <option value="8º Ano EF">8º Ano EF</option>
+              <option value="9º Ano EF">9º Ano EF (Anos Finais)</option>
+            </select>
+          </div>
+          <div class="modal-form-group">
+            <label>Tipo de Avaliação</label>
+            <select id="nova-ava-tipo" class="modal-select" required>
+              <option value="Diagnóstica">Diagnóstica</option>
+              <option value="Formativa">Formativa</option>
+              <option value="Somativa">Somativa</option>
+              <option value="Simulado SAEB">Simulado SAEB</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Data de Início da Aplicação</label>
+            <input type="date" id="nova-ava-inicio" class="modal-input" value="2026-05-02" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Data Limite / Fim</label>
+            <input type="date" id="nova-ava-fim" class="modal-input" value="2026-05-20" required>
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Quantidade de Itens / Questões (Matriz BNCC)</label>
+          <input type="number" id="nova-ava-itens" class="modal-input" value="22" min="1" max="60" required>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-nova-avaliacao')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar e Publicar Prova</button>
+        </div>
+      </form>
+    </div>
+
+  </div>

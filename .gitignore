@@ -1,0 +1,21 @@
+# Segredos Criptográficos e Credenciais de Banco (NUNCA versionar)
+.env
+.env.*
+!.env.example
+
+# Ambiente Virtual Python e Caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Bancos Locais e Logs
+*.db
+*.db-wal
+*.db-shm
+*.log
+
+# Arquivos de backup zip pesados
+*.zip
+
+

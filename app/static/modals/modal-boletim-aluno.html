@@ -1,0 +1,26 @@
+  <!-- Modal: Boletim Pedagógico Individual -->
+  <div id="modal-boletim-aluno" class="modal-overlay">
+    <div class="modal-content" style="max-width: 780px;">
+      <div class="modal-header">
+        <h3>Boletim Diagnóstico Individual do Estudante</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-boletim-aluno')">&times;</button>
+      </div>
+
+      <div id="boletim-corpo-conteudo"></div>
+
+      <div id="boletim-footer-visualizacao" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+        <button class="btn btn-edit" id="btn-abrir-edicao-boletim" onclick="alternarEdicaoBoletim(true)">
+          Editar Habilidades BNCC / Parecer
+        </button>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-secondary" onclick="window.print()">Imprimir Boletim</button>
+          <button class="btn btn-primary" onclick="fecharModal('modal-boletim-aluno')">Fechar</button>
+        </div>
+      </div>
+
+      <div id="boletim-footer-edicao" style="display: none; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+        <button type="button" class="btn btn-secondary" onclick="alternarEdicaoBoletim(false)">Cancelar Edição</button>
+        <button type="button" class="btn btn-primary" id="btn-salvar-boletim-aluno" onclick="salvarEdicaoBoletimEstudante()">Salvar Alterações do Boletim</button>
+      </div>
+    </div>
+  </div>

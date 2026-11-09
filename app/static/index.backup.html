@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AVALIA AB - Plataforma de Avaliação e Monitoramento da Educação • Água Boa - MT</title>
+  
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
+  <!-- Tipografia Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js para BI e Gráficos Analíticos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Estilos da Plataforma AVALIA AB -->
+  <link rel="stylesheet" href="/static/style.css?v=5">
+</head>
+<body>
+
+  <!-- HEADER PRINCIPAL COM IDENTIDADE DO MUNICÍPIO -->
+  <header class="app-header glass-panel">
+    <div class="header-top-row">
+      <div class="header-brand">
+        <img src="/static/logo_avalia_ab_sharp.png" alt="Logo AVALIA AB" class="brand-logo-img">
+      </div>
+
+      <!-- AÇÕES RÁPIDAS NO TOPO COM INDICADOR DE PERFIL / RBAC -->
+      <div class="header-actions">
+        <div class="status-pill">
+          <span class="pulse-dot"></span>
+          <span>Rede Sincronizada</span>
+        </div>
+
+        <!-- SELETOR / INDICADOR DO PERFIL ATIVO -->
+        <div class="perfil-rbac-pill" style="display: flex; align-items: center; gap: 8px; background: rgba(0, 45, 98, 0.06); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(0, 45, 98, 0.15);">
+          <span style="font-size: 0.76rem; font-weight: 700; color: var(--gov-primary);">Perfil:</span>
+          <select id="select-perfil-rbac" class="form-control" style="font-size: 0.78rem; padding: 2px 8px; height: 26px; border-radius: 12px; font-weight: 600; border: 1px solid #cbd5e1; background: #ffffff; color: var(--gov-primary);" onchange="aoMudarPerfilAtivoRBAC(this.value)">
+            <option value="admin">Administrador (SEDUC / TI)</option>
+            <option value="coordenador">Coordenador Pedagógico</option>
+            <option value="diretor">Diretor / Secretário</option>
+            <option value="professor">Professor / Docente</option>
+          </select>
+        </div>
+
+        <a href="/api/v1/exportar/csv" class="btn btn-secondary" title="Exportar dados consolidados em planilha">
+          Exportar CSV
+        </a>
+        <a href="/docs" target="_blank" class="btn btn-secondary" title="Documentação Interativa Swagger API">
+          OpenAPI
+        </a>
+      </div>
+    </div>
+
+    <!-- NAVEGAÇÃO SPA COMPLETA ABAIXO DA LOGOMARCA (SEM ÍCONES) -->
+    <nav class="header-nav header-nav-bar">
+      <button class="nav-tab-btn active" data-screen="dashboard">
+        Painel Geral
+      </button>
+      <button class="nav-tab-btn" data-screen="cadastros">
+        Cadastros
+      </button>
+      <button class="nav-tab-btn" data-screen="escolas">
+        Rede & Escolas
+      </button>
+      <button class="nav-tab-btn" data-screen="alunos">
+        Estudantes
+      </button>
+      <button class="nav-tab-btn" data-screen="notas">
+        Inserir Notas
+      </button>
+      <button class="nav-tab-btn" data-screen="relatorios">
+        BI & Relatórios
+      </button>
+      <button class="nav-tab-btn" data-screen="configuracoes">
+        Configurações
+      </button>
+    </nav>
+  </header>
+
+  <!-- CONTAINER PRINCIPAL -->
+  <main class="main-container">
+
+    <!-- ========================================== -->
+    <!-- MÓDULO: PAINEL GERAL (DASHBOARD) -->
+    <!-- ========================================== -->
+    <div id="screen-dashboard" class="screen-view">
+      <div class="screen-header">
+        <div>
+          <h2>Painel Geral de Avaliação Educacional</h2>
+          <p class="section-desc">Métricas consolidadas do ciclo avaliativo, metas municipais e alertas pedagógicos de Água Boa - MT.</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-secondary" onclick="carregarTodasMetricas()">
+            Atualizar Dados
+          </button>
+          <button class="btn btn-primary" onclick="abrirModalNovaAvaliacao()">
+            Agendar Avaliação
+          </button>
+        </div>
+      </div>
+
+      <!-- CARDS DE KPIS EXECUTIVOS COM CORES VIBRANTES DE ALTO IMPACTO -->
+      <section class="metrics-grid">
+        <div class="metric-card card-vibrant-blue">
+          <div class="metric-header">
+            <span class="metric-label">Estudantes Matriculados</span>
+          </div>
+          <h3 class="metric-value" id="kpi-alunos">4.820</h3>
+          <span class="metric-sub"><span class="trend-up">●</span> 100% da rede cadastrada no Censo Escolar</span>
+        </div>
+
+        <div class="metric-card card-vibrant-green">
+          <div class="metric-header">
+            <span class="metric-label">Taxa de Participação</span>
+          </div>
+          <h3 class="metric-value" id="kpi-participacao">95.6%</h3>
+          <span class="metric-sub"><span class="trend-up">+2.4%</span> Acima da meta do Compromisso Criança Alfabetizada</span>
+        </div>
+
+        <div class="metric-card card-vibrant-purple">
+          <div class="metric-header">
+            <span class="metric-label">Nota Média Língua Portuguesa (0 a 10)</span>
+          </div>
+          <h3 class="metric-value" id="kpi-lp">7,8</h3>
+          <span class="metric-sub" id="kpi-lp-sub">Língua Portuguesa • Meta 2026: 8,0</span>
+        </div>
+
+        <div class="metric-card card-vibrant-amber">
+          <div class="metric-header">
+            <span class="metric-label">Nota Média Matemática (0 a 10)</span>
+          </div>
+          <h3 class="metric-value" id="kpi-mat">8,1</h3>
+          <span class="metric-sub" id="kpi-mat-sub">Matemática • Meta 2026: 8,2</span>
+        </div>
+      </section>
+
+      <!-- GRIDS DO DASHBOARD COM GRÁFICOS E ALERTAS -->
+      <div class="dashboard-grid-2cols">
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Evolução das Notas Médias Municipais (Escala 0 a 10)</h3>
+            <span class="badge-tag primary">2023 - 2026</span>
+          </div>
+          <div class="chart-box">
+            <canvas id="chartEvolucaoHistorica"></canvas>
+          </div>
+        </div>
+
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Padrões de Aprendizagem</h3>
+            <span class="badge-tag success">Ciclo Atual</span>
+          </div>
+          <div class="chart-box">
+            <canvas id="chartDistribuicaoNiveis"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid-2cols">
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Alertas Pedagógicos Prioritários da Rede</h3>
+            <span class="badge-tag warning">Ação SME</span>
+          </div>
+          <div class="pedagogic-alerts-list" id="lista-alertas-pedagogicos"></div>
+        </div>
+
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Unidades da Rede Municipal</h3>
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="trocarTela('escolas')">Ver Todas (9)</button>
+          </div>
+          <div class="table-container">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>Escola</th>
+                  <th>Alunos</th>
+                  <th>Média LP/MAT</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-resumo-escolas"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA: CADASTROS DA PLATAFORMA -->
+    <!-- ========================================== -->
+    <div id="screen-cadastros" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Módulo Central de Cadastros Educacionais</h2>
+          <p class="section-desc">Gerenciamento nominal e estrutural de Usuários, Escolas, Alunos, Cargos, Turmas e Matriz Curricular de Água Boa - MT.</p>
+        </div>
+        <div class="section-actions" id="cadastros-top-actions">
+          <!-- Botão dinâmico injetado de acordo com a sub-aba ativa -->
+        </div>
+      </div>
+
+      <!-- SUB-ABAS DE CADASTROS -->
+      <nav class="sub-nav-tabs">
+        <button class="sub-tab-btn active" data-sub="usuarios" onclick="trocarSubAbaCadastro('usuarios')">
+          Usuários
+        </button>
+        <button class="sub-tab-btn" data-sub="cargos" onclick="trocarSubAbaCadastro('cargos')">
+          Cargos
+        </button>
+        <button class="sub-tab-btn" data-sub="escolas" onclick="trocarSubAbaCadastro('escolas')">
+          Escolas
+        </button>
+        <button class="sub-tab-btn" data-sub="turmas" onclick="trocarSubAbaCadastro('turmas')">
+          Turmas
+        </button>
+        <button class="sub-tab-btn" data-sub="alunos" onclick="trocarSubAbaCadastro('alunos')">
+          Alunos
+        </button>
+        <button class="sub-tab-btn" data-sub="matriz" onclick="trocarSubAbaCadastro('matriz')">
+          Matriz Curricular
+        </button>
+      </nav>
+
+      <!-- BARRA DE CONTROLE: BUSCA, ORDENAÇÃO E ALTERNAR MODO (LISTA / CARTÕES) -->
+      <div class="view-control-toolbar">
+        <div class="view-control-main-row">
+          <div class="view-control-left">
+            <input type="text" id="busca-cadastros" placeholder="Buscar registros neste cadastro..." class="search-input" oninput="filtrarCadastrosGenerico(this.value)">
+            <select id="ordem-cadastros" class="filter-select" onchange="ordenarCadastrosGenerico(this.value)">
+              <option value="padrao">Ordenar: Código Sequencial</option>
+              <option value="nome-asc">Nome / Descrição (A - Z)</option>
+              <option value="nome-desc">Nome / Descrição (Z - A)</option>
+            </select>
+          </div>
+          <div class="view-control-right">
+            <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-dim);">Exibição:</span>
+            <div class="view-mode-toggle">
+              <button class="view-mode-btn active" id="btn-view-lista" onclick="alternarModoExibicaoCadastros('lista')">Lista</button>
+              <button class="view-mode-btn" id="btn-view-cards" onclick="alternarModoExibicaoCadastros('cartoes')">Em Cartão</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros específicos para a sub-aba de Usuários -->
+        <div id="filtros-especificos-usuarios" class="filters-dynamic-grid" style="display: none;">
+          <select id="filtro-cad-usu-codigo" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Códigos</option>
+          </select>
+          <select id="filtro-cad-usu-nome" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Nomes</option>
+          </select>
+          <select id="filtro-cad-usu-cpf" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os CPFs</option>
+          </select>
+          <select id="filtro-cad-usu-cargo" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Cargos</option>
+          </select>
+          <select id="filtro-cad-usu-endereco" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Endereços</option>
+          </select>
+          <select id="filtro-cad-usu-telefone" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Telefones</option>
+          </select>
+          <select id="filtro-cad-usu-email" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os E-mails</option>
+          </select>
+          <select id="filtro-cad-usu-status" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Status</option>
+            <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
+          </select>
+        </div>
+
+        <!-- Filtros específicos para a sub-aba de Cargos -->
+        <div id="filtros-especificos-cargos" class="filters-dynamic-grid" style="display: none;">
+          <select id="filtro-cad-car-codigo" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Cód. Cargos</option>
+          </select>
+          <select id="filtro-cad-car-cargo" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Cargos</option>
+          </select>
+          <select id="filtro-cad-car-departamento" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Departamentos</option>
+          </select>
+          <select id="filtro-cad-car-data" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todas as Datas Cadastro</option>
+          </select>
+        </div>
+
+        <!-- Filtros específicos para a sub-aba de Escolas -->
+        <div id="filtros-especificos-escolas" class="filters-dynamic-grid" style="display: none;">
+          <select id="filtro-cad-esc-codigo" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Códigos</option>
+          </select>
+          <select id="filtro-cad-esc-nome" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todas as Escolas</option>
+          </select>
+          <select id="filtro-cad-esc-endereco" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Endereços</option>
+          </select>
+        </div>
+
+        <!-- Filtros específicos para a sub-aba de Turmas -->
+        <div id="filtros-especificos-turmas" class="filters-dynamic-grid" style="display: none;">
+          <select id="filtro-cad-tur-escola" class="filter-select" onchange="aoMudarFiltroEscolaCadTurmas(this.value)">
+            <option value="todos">Todas as Escolas</option>
+          </select>
+          <select id="filtro-cad-tur-periodo" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Períodos</option>
+          </select>
+          <select id="filtro-cad-tur-modalidade" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todas as Modalidades</option>
+          </select>
+          <select id="filtro-cad-tur-etapa" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todas as Etapas</option>
+          </select>
+          <select id="filtro-cad-tur-turno" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Turnos</option>
+            <option value="Matutino">Matutino</option>
+            <option value="Vespertino">Vespertino</option>
+            <option value="Integral">Integral</option>
+          </select>
+          <select id="filtro-cad-tur-sala" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todas as Salas</option>
+          </select>
+        </div>
+
+        <!-- Filtros específicos para a sub-aba de Alunos -->
+        <div id="filtros-especificos-alunos" class="filters-dynamic-grid" style="display: none;">
+          <select id="filtro-cad-alu-escola" class="filter-select" onchange="aoMudarFiltroEscolaCadAlunos(this.value)">
+            <option value="todos">Todas as Escolas</option>
+          </select>
+          <select id="filtro-cad-alu-turma" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todas as Turmas</option>
+          </select>
+          <select id="filtro-cad-alu-sala" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todas as Salas</option>
+          </select>
+          <select id="filtro-cad-alu-turno" class="filter-select" onchange="filtrarCadastrosGenerico()">
+            <option value="todos">Todos os Turnos</option>
+            <option value="Matutino">Matutino</option>
+            <option value="Vespertino">Vespertino</option>
+            <option value="Integral">Integral</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- CONTEÚDOS DAS SUB-ABAS DE CADASTROS -->
+      
+      <!-- Sub-Aba a: Usuários -->
+      <div id="sub-cadastro-usuarios" class="sub-cadastro-content">
+        <div id="view-usuarios-lista" class="table-container glass-panel">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Código (XXXX)</th>
+                <th>Nome Completo</th>
+                <th>CPF</th>
+                <th>Cargo</th>
+                <th>Perfil (RBAC)</th>
+                <th>Endereço</th>
+                <th>Telefone</th>
+                <th>E-mail</th>
+                <th>Status</th>
+                <th style="text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-cad-usuarios-body"></tbody>
+          </table>
+        </div>
+        <div id="view-usuarios-cartoes" class="cards-view-grid" style="display: none;"></div>
+      </div>
+
+      <!-- Sub-Aba b: Escola -->
+      <div id="sub-cadastro-escolas" class="sub-cadastro-content" style="display: none;">
+        <div id="view-escolas-lista" class="table-container glass-panel">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Código (XXX)</th>
+                <th>Nome da Escola</th>
+                <th>Endereço</th>
+                <th>Número</th>
+                <th>Bairro</th>
+                <th>Telefone</th>
+                <th>INEP</th>
+                <th>Total Alunos</th>
+                <th style="text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-cad-escolas-body"></tbody>
+          </table>
+        </div>
+        <div id="view-escolas-cartoes" class="cards-view-grid" style="display: none;"></div>
+      </div>
+
+      <!-- Sub-Aba c: Aluno -->
+      <div id="sub-cadastro-alunos" class="sub-cadastro-content" style="display: none;">
+        <div id="view-alunos-lista" class="table-container glass-panel">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Cód. Escola</th>
+                <th>Nome da Escola</th>
+                <th>Cód. Aluno (XXXX)</th>
+                <th>INEP</th>
+                <th>Nome do Estudante</th>
+                <th>Nome do Responsável</th>
+                <th>Endereço</th>
+                <th>Telefone Responsável</th>
+                <th>Turma</th>
+                <th>Sala</th>
+                <th>Turno</th>
+                <th style="text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-cad-alunos-body"></tbody>
+          </table>
+        </div>
+        <div id="view-alunos-cartoes" class="cards-view-grid" style="display: none;"></div>
+      </div>
+
+      <!-- Sub-Aba d: Cargo -->
+      <div id="sub-cadastro-cargos" class="sub-cadastro-content" style="display: none;">
+        <div id="view-cargos-lista" class="table-container glass-panel">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Cód. Cargo</th>
+                <th>Nome do Cargo</th>
+                <th>Departamento / Lotação</th>
+                <th>Data Cadastro</th>
+                <th style="text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-cad-cargos-body"></tbody>
+          </table>
+        </div>
+        <div id="view-cargos-cartoes" class="cards-view-grid" style="display: none;"></div>
+      </div>
+
+      <!-- Sub-Aba e: Turma -->
+      <div id="sub-cadastro-turmas" class="sub-cadastro-content" style="display: none;">
+        <div id="view-turmas-lista" class="table-container glass-panel">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Cód. Escola</th>
+                <th>Nome da Escola</th>
+                <th>Período Letivo</th>
+                <th>Modalidade</th>
+                <th>Etapa</th>
+                <th>Turma</th>
+                <th>Turno</th>
+                <th>Sala</th>
+                <th>Total Alunos</th>
+                <th style="text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-cad-turmas-body"></tbody>
+          </table>
+        </div>
+        <div id="view-turmas-cartoes" class="cards-view-grid" style="display: none;"></div>
+      </div>
+
+      <!-- Sub-Aba f: Matriz Curricular -->
+      <div id="sub-cadastro-matriz" class="sub-cadastro-content" style="display: none;">
+        <div id="view-matriz-lista" class="table-container glass-panel">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Cód. Escola</th>
+                <th>Nome da Escola</th>
+                <th>Turma</th>
+                <th>Sala</th>
+                <th>Turno</th>
+                <th>Disciplina</th>
+                <th style="text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-cad-matriz-body"></tbody>
+          </table>
+        </div>
+        <div id="view-matriz-cartoes" class="cards-view-grid" style="display: none;"></div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MÓDULO: AVALIAÇÕES DIAGNÓSTICAS & FORMATIVAS -->
+    <!-- ========================================== -->
+    <div id="screen-avaliacoes" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Gestão de Avaliações Diagnósticas e Formativas</h2>
+          <p class="section-desc">Planejamento, aplicação e acompanhamento de instrumentos avaliativos na rede municipal de Água Boa.</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-primary" onclick="abrirModalNovaAvaliacao()">
+            Nova Avaliação
+          </button>
+        </div>
+      </div>
+
+      <!-- BARRA DE CONTROLE: BUSCA, FILTRO E ORDENAR (LISTA / CARTÕES) -->
+      <div class="view-control-toolbar">
+        <div class="view-control-left">
+          <input type="text" id="busca-avaliacoes" placeholder="Buscar por código, título ou ano escolar..." class="search-input" oninput="filtrarAvaliacoes()">
+          <select id="filtro-comp-avaliacoes" class="filter-select" onchange="filtrarAvaliacoes()">
+            <option value="todos">Todos os Componentes</option>
+            <option value="Língua Portuguesa">Língua Portuguesa</option>
+            <option value="Matemática">Matemática</option>
+            <option value="Ciências da Natureza">Ciências da Natureza</option>
+            <option value="Fluência em Leitura">Fluência em Leitura</option>
+          </select>
+          <select id="filtro-status-avaliacoes" class="filter-select" onchange="filtrarAvaliacoes()">
+            <option value="todos">Todos os Status</option>
+            <option value="Concluída">Concluídas</option>
+            <option value="Em Aplicação">Em Aplicação</option>
+            <option value="Agendada">Agendadas</option>
+          </select>
+          <select id="ordem-avaliacoes" class="filter-select" onchange="ordenarAvaliacoes(this.value)">
+            <option value="padrao">Ordenar: Padrão</option>
+            <option value="titulo-asc">Título (A - Z)</option>
+            <option value="participacao-desc">Maior Participação</option>
+            <option value="media-desc">Maior Média</option>
+          </select>
+        </div>
+        <div class="view-control-right">
+          <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-dim);">Exibição:</span>
+          <div class="view-mode-toggle">
+            <button class="view-mode-btn active" id="btn-view-ava-lista" onclick="alternarModoExibicaoAvaliacoes('lista')">Lista</button>
+            <button class="view-mode-btn" id="btn-view-ava-cards" onclick="alternarModoExibicaoAvaliacoes('cartoes')">Em Cartão</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-avaliacoes-lista" class="table-container glass-panel">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Instrumento Avaliativo</th>
+              <th>Componente</th>
+              <th>Ano/Série</th>
+              <th>Tipo</th>
+              <th>Período</th>
+              <th>Avaliados / Total</th>
+              <th>Taxa</th>
+              <th>Média SAEB</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-avaliacoes-body"></tbody>
+        </table>
+      </div>
+
+      <div id="view-avaliacoes-cartoes" class="cards-view-grid" style="display: none;"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MÓDULO: REDE & ESCOLAS (VISÃO GERAL) -->
+    <!-- ========================================== -->
+    <div id="screen-escolas" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Rede Municipal de Ensino de Água Boa - MT</h2>
+          <p class="section-desc">Diretório de Unidades Escolares, polos urbanos, do campo e indígenas com gestão de turmas e enturmações.</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-primary" onclick="abrirModalCadEscola()">
+            Cadastrar Escola
+          </button>
+        </div>
+      </div>
+
+      <!-- BARRA DE CONTROLE: BUSCA, FILTRO E ORDENAR (LISTA / CARTÕES) -->
+      <div class="view-control-toolbar">
+        <div class="view-control-left">
+          <input type="text" id="busca-escola" placeholder="Buscar por nome da escola ou bairro..." class="search-input" onkeyup="filtrarEscolasCards(this.value)">
+          <select id="filtro-zona-escolas" class="filter-select" onchange="filtrarEscolasPorZona(this.value)">
+            <option value="todos">Todas as Zonas</option>
+            <option value="Urbana">Zona Urbana</option>
+            <option value="Campo">Polo do Campo (Rural)</option>
+            <option value="Indígena">Polo Indígena</option>
+          </select>
+          <select id="ordem-escolas" class="filter-select" onchange="ordenarEscolas(this.value)">
+            <option value="padrao">Ordenar: Código Sequencial</option>
+            <option value="nome-asc">Nome da Escola (A - Z)</option>
+            <option value="alunos-desc">Maior Nº de Alunos</option>
+            <option value="nota-desc">Maior Nota Média</option>
+          </select>
+        </div>
+        <div class="view-control-right">
+          <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-dim);">Exibição:</span>
+          <div class="view-mode-toggle">
+            <button class="view-mode-btn" id="btn-view-esc-lista" onclick="alternarModoExibicaoEscolas('lista')">Lista</button>
+            <button class="view-mode-btn active" id="btn-view-esc-cards" onclick="alternarModoExibicaoEscolas('cartoes')">Em Cartão</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-escolas-lista" class="table-container glass-panel" style="display: none;">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nome da Escola</th>
+              <th>Zona / Polo</th>
+              <th>Endereço Completo</th>
+              <th>Telefone</th>
+              <th>INEP</th>
+              <th>Turmas</th>
+              <th>Alunos</th>
+              <th>Participação</th>
+              <th>Média</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-escolas-body"></tbody>
+        </table>
+      </div>
+
+      <div class="directory-cards-grid" id="grid-escolas-cards"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MÓDULO: QUADRO DE ESTUDANTES & BOLETINS -->
+    <!-- ========================================== -->
+    <div id="screen-alunos" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Quadro Geral de Estudantes</h2>
+          <p class="section-desc">Consulta nominal de estudantes, registros de frequência, níveis de aprendizagem e emissão de boletins pedagógicos.</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-primary" onclick="abrirModalCadAluno()">
+            Novo Aluno
+          </button>
+        </div>
+      </div>
+
+      <!-- BARRA DE CONTROLE: BUSCA, FILTRO E ORDENAR (LISTA / CARTÕES) -->
+      <div class="view-control-toolbar">
+        <div class="view-control-main-row">
+          <div class="view-control-left">
+            <input type="text" id="busca-estudante" placeholder="Buscar por Nome do Aluno, Cód. Aluno ou Turma..." class="search-input" onkeyup="filtrarAlunosTabela(this.value)">
+            <select id="ordem-alunos" class="filter-select" onchange="ordenarAlunos(this.value)">
+              <option value="padrao">Ordenar: Código</option>
+              <option value="nome-asc">Nome do Aluno (A - Z)</option>
+              <option value="media-desc">Maior Média Geral</option>
+              <option value="media-asc">Menor Média Geral</option>
+            </select>
+          </div>
+          <div class="view-control-right">
+            <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-dim);">Exibição:</span>
+            <div class="view-mode-toggle">
+              <button class="view-mode-btn active" id="btn-view-alu-lista" onclick="alternarModoExibicaoAlunos('lista')">Lista</button>
+              <button class="view-mode-btn" id="btn-view-alu-cards" onclick="alternarModoExibicaoAlunos('cartoes')">Em Cartão</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="filters-dynamic-grid">
+          <select id="filtro-escola-alunos" class="filter-select" onchange="aoMudarFiltroEscolaEstudantes(this.value)">
+            <option value="todos">Todas as Escolas</option>
+          </select>
+          <select id="filtro-turma-alunos" class="filter-select" onchange="filtrarAlunosTabela()">
+            <option value="todos">Todas as Turmas</option>
+          </select>
+          <select id="filtro-sala-alunos" class="filter-select" onchange="filtrarAlunosTabela()">
+            <option value="todos">Todas as Salas</option>
+          </select>
+          <select id="filtro-turno-alunos" class="filter-select" onchange="filtrarAlunosTabela()">
+            <option value="todos">Todos os Turnos</option>
+            <option value="Matutino">Matutino</option>
+            <option value="Vespertino">Vespertino</option>
+            <option value="Integral">Integral</option>
+          </select>
+          <select id="filtro-nivel-alunos" class="filter-select" onchange="filtrarAlunosPorNivel(this.value)">
+            <option value="todos">Todos os Níveis</option>
+            <option value="Avançado">Avançado</option>
+            <option value="Adequado">Adequado</option>
+            <option value="Básico">Básico</option>
+            <option value="Abaixo do Básico">Abaixo do Básico</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="view-alunos-lista" class="table-container glass-panel">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Cód. Aluno</th>
+              <th>Nome do Estudante</th>
+              <th>Unidade Escolar</th>
+              <th>Turma</th>
+              <th>Frequência</th>
+              <th>Nota LP (0-10)</th>
+              <th>Nota MAT (0-10)</th>
+              <th>Média Geral</th>
+              <th>Nível / Desempenho</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-alunos-body"></tbody>
+        </table>
+      </div>
+
+      <div id="view-alunos-cartoes" class="cards-view-grid" style="display: none;"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MÓDULO: BI & RELATÓRIOS ANALÍTICOS -->
+    <!-- ========================================== -->
+    <div id="screen-relatorios" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Business Intelligence & Relatórios de Proficiência</h2>
+          <p class="section-desc">Comparativos entre unidades escolares, métricas na escala SAEB e curvas pedagógicas TRI de Água Boa.</p>
+        </div>
+        <div class="section-actions">
+          <a href="/api/v1/exportar/csv" class="btn btn-primary">
+            Exportar Microdados (CSV)
+          </a>
+          <button class="btn btn-secondary" onclick="imprimirRelatorioBI()">
+            Imprimir Relatório Executivo
+          </button>
+        </div>
+      </div>
+
+      <!-- PAINEL DE PARAMETRIZAÇÃO E FILTROS DO RELATÓRIO -->
+      <div class="glass-panel panel-filtro-notas" style="margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="font-size: 0.95rem; color: var(--gov-primary); margin: 0; font-weight: 700;">
+              Parâmetros e Filtros do Relatório
+            </h3>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">Defina a unidade, turma, disciplina ou nível para atualizar os gráficos e gerar relatórios customizados.</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" style="font-size: 0.78rem; padding: 5px 12px;" onclick="limparFiltrosRelatorios()">
+              Limpar Filtros
+            </button>
+            <button class="btn btn-primary" style="font-size: 0.78rem; padding: 5px 12px;" onclick="exportarRelatorioFiltradoCSV()">
+              Exportar Excel (CSV)
+            </button>
+            <button class="btn btn-secondary" style="font-size: 0.78rem; padding: 5px 12px;" onclick="imprimirRelatorioFiltrado()">
+              Imprimir Relatório
+            </button>
+          </div>
+        </div>
+
+        <div class="grid-filtros-notas">
+          <!-- 1. ESCOLA -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              1. Unidade Escolar
+            </label>
+            <select id="rel-filtro-escola" class="form-control form-control-compact" onchange="aoMudarFiltroEscolaRelatorio(this.value)">
+              <option value="todos">Todas as Escolas</option>
+            </select>
+          </div>
+
+          <!-- 2. TURMA -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              2. Turma / Ano
+            </label>
+            <select id="rel-filtro-turma" class="form-control form-control-compact" onchange="filtrarDadosRelatorios()">
+              <option value="todos">Todas as Turmas</option>
+            </select>
+          </div>
+
+          <!-- 3. DISCIPLINA -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              3. Disciplina
+            </label>
+            <select id="rel-filtro-disciplina" class="form-control form-control-compact" onchange="filtrarDadosRelatorios()">
+              <option value="todas">Todas as Disciplinas</option>
+              <option value="Língua Portuguesa">Língua Portuguesa</option>
+              <option value="Matemática">Matemática</option>
+            </select>
+          </div>
+
+          <!-- 4. NÍVEL DE APRENDIZAGEM -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              4. Nível de Aprendizagem
+            </label>
+            <select id="rel-filtro-nivel" class="form-control form-control-compact" onchange="filtrarDadosRelatorios()">
+              <option value="todos">Todos os Níveis</option>
+              <option value="Abaixo do Básico">Abaixo do Básico (Intervenção)</option>
+              <option value="Básico">Básico</option>
+              <option value="Adequado">Adequado</option>
+              <option value="Avançado">Avançado</option>
+            </select>
+          </div>
+
+          <!-- 5. BUSCA RÁPIDA -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              5. Buscar Estudante
+            </label>
+            <input type="text" id="rel-busca-aluno" class="form-control form-control-compact" placeholder="Nome ou código..." oninput="filtrarDadosRelatorios()">
+          </div>
+        </div>
+      </div>
+
+      <!-- CARDS DE RESUMO DO RECORTE SELECIONADO -->
+      <div id="rel-cards-resumo" class="metrics-grid" style="margin-bottom: 22px;">
+        <div class="metric-card card-vibrant-blue">
+          <div class="metric-header">
+            <span class="metric-label">Alunos no Recorte</span>
+          </div>
+          <h3 class="metric-value" id="rel-kpi-total-alunos">0</h3>
+          <span class="metric-sub" id="rel-kpi-sub-escola">Filtro ativo</span>
+        </div>
+
+        <div class="metric-card card-vibrant-purple">
+          <div class="metric-header">
+            <span class="metric-label">Média Língua Portuguesa</span>
+          </div>
+          <h3 class="metric-value" id="rel-kpi-media-lp">0,0</h3>
+          <span class="metric-sub">Português (0 a 10)</span>
+        </div>
+
+        <div class="metric-card card-vibrant-green">
+          <div class="metric-header">
+            <span class="metric-label">Média Matemática</span>
+          </div>
+          <h3 class="metric-value" id="rel-kpi-media-mat">0,0</h3>
+          <span class="metric-sub">Matemática (0 a 10)</span>
+        </div>
+
+        <div class="metric-card card-vibrant-amber">
+          <div class="metric-header">
+            <span class="metric-label">Abaixo do Básico (Alerta)</span>
+          </div>
+          <h3 class="metric-value" id="rel-kpi-abaixo-basico">0%</h3>
+          <span class="metric-sub">Exigem intervenção</span>
+        </div>
+      </div>
+
+      <div class="content-card glass-panel" style="margin-bottom: 24px;">
+        <div class="content-card-header">
+          <h3 id="rel-titulo-grafico-escolas">Comparativo de Notas Médias (0 a 10) por Unidade Escolar</h3>
+          <span class="badge-tag primary">Língua Portuguesa vs Matemática</span>
+        </div>
+        <div class="chart-box" style="height: 380px;">
+          <canvas id="chartComparativoEscolas"></canvas>
+        </div>
+      </div>
+
+      <div class="dashboard-grid-2cols">
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Comparativo: Desempenho Real vs Meta Municipal 2026</h3>
+            <span class="badge-tag success">Alinhado com PME</span>
+          </div>
+          <div class="chart-box">
+            <canvas id="chartMetasComparativo"></canvas>
+          </div>
+        </div>
+
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Indicadores de Qualidade da Educação (IDEB / MT)</h3>
+          </div>
+          <div class="pedagogic-alerts-list">
+            <div class="alert-item sucesso">
+              <div class="alert-item-header">
+                <span>IDEB Projetado Anos Iniciais (5º Ano)</span>
+                <strong>6.4</strong>
+              </div>
+              <div class="alert-item-desc">Meta municipal de 6.2 superada no ciclo diagnósticos de 2026.</div>
+            </div>
+            <div class="alert-item sucesso">
+              <div class="alert-item-header">
+                <span>IDEB Projetado Anos Finais (9º Ano)</span>
+                <strong>5.7</strong>
+              </div>
+              <div class="alert-item-desc">Evolução de +0.4 em relação ao ciclo anterior da rede municipal.</div>
+            </div>
+            <div class="alert-item atencao">
+              <div class="alert-item-header">
+                <span>Taxa de Alfabetização no 2º Ano</span>
+                <strong>87.2%</strong>
+              </div>
+              <div class="alert-item-desc">Compromisso Criança Alfabetizada estabelece meta de 90.0% até o fim do ano letivo.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABELA ANALÍTICA DETALHADA DO RECORTE -->
+      <div class="content-card glass-panel" style="margin-top: 24px;">
+        <div class="content-card-header" style="flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="margin: 0;">Quadro Analítico de Desempenho dos Estudantes</h3>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Estudantes do recorte selecionado nos parâmetros com notas individuais e níveis</span>
+          </div>
+          <span class="badge-tag primary" id="rel-total-tabela-badge">0 Registros</span>
+        </div>
+        <div class="table-container">
+          <table class="modern-table" id="tabela-relatorios-analitica">
+            <thead>
+              <tr>
+                <th style="width: 75px;">Cód.</th>
+                <th>Estudante</th>
+                <th>Escola</th>
+                <th>Turma</th>
+                <th style="text-align: center;">Português (0 a 10)</th>
+                <th style="text-align: center;">Nível LP</th>
+                <th style="text-align: center;">Matemática (0 a 10)</th>
+                <th style="text-align: center;">Nível MAT</th>
+                <th style="text-align: center;">Média Geral</th>
+                <th style="text-align: center;">Boletim</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-relatorios-analitica">
+              <tr>
+                <td colspan="10" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                  Carregando dados analíticos...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA: CONFIGURAÇÕES DA PLATAFORMA -->
+    <!-- ========================================== -->
+    <div id="screen-configuracoes" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Configurações Gerais da Plataforma</h2>
+          <p class="section-desc">Gerenciamento de Segurança, Permissões e Habilitação/Desabilitação de Funcionalidades do AVALIA AB.</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-primary" onclick="salvarTodasConfiguracoes()">
+            Salvar Todas as Configurações
+          </button>
+        </div>
+      </div>
+
+      <!-- SUB-ABAS DE CONFIGURAÇÃO -->
+      <nav class="sub-nav-tabs">
+        <button class="sub-tab-btn active" id="btn-subcfg-media-niveis" onclick="trocarSubAbaConfig('media-niveis')">
+          Média Geral & Níveis de Aprendizagem
+        </button>
+        <button class="sub-tab-btn" id="btn-subcfg-seguranca" onclick="trocarSubAbaConfig('seguranca')">
+          Seguranças & Acessos
+        </button>
+        <button class="sub-tab-btn" id="btn-subcfg-funcionalidades" onclick="trocarSubAbaConfig('funcionalidades')">
+          Habilitar e Desabilitar Funcionalidades
+        </button>
+      </nav>
+
+      <!-- Sub-Aba: Parametrização da Média Geral e Níveis de Aprendizagem -->
+      <div id="sub-config-media-niveis" class="sub-config-content">
+        <div class="content-card glass-panel" style="margin-bottom: 24px;">
+          <div class="content-card-header">
+            <div>
+              <h3>Parametrização da Média Geral e Níveis de Aprendizagem</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                Defina a nota média padrão da rede e as faixas de corte para a classificação automática dos estudantes em todos os módulos e boletins.
+              </p>
+            </div>
+            <span class="badge-tag primary">Classificação Automática</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-top: 16px;">
+            <!-- Média Geral de Aprovação -->
+            <div style="background: #ffffff; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm);">
+              <label style="font-weight: 700; color: var(--gov-primary); font-size: 0.95rem; display: block; margin-bottom: 6px;">
+                Média Geral de Aprovação da Rede
+              </label>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                Nota de corte mínima exigida para aprovação curricular em Água Boa - MT.
+              </p>
+              <input type="number" id="cfg-media-geral" class="form-control" step="0.1" min="0" max="10" value="6.0" style="font-size: 1.15rem; font-weight: 700; max-width: 160px;">
+            </div>
+
+            <!-- Faixa: Avançado -->
+            <div style="background: #ffffff; border: 1px solid #bbf7d0; border-left: 5px solid #16a34a; border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-weight: 700; color: #166534; font-size: 0.95rem;">
+                  Nível Avançado
+                </label>
+                <span class="badge-status ativo">Avançado</span>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                Desempenho plenamente consolidado além da expectativa municipal.
+              </p>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="number" id="cfg-min-avancado" class="form-control" step="0.1" min="0" max="10" value="8.0" style="font-weight: 700; width: 85px;">
+                <span style="font-weight: 600; color: var(--text-muted);">até</span>
+                <input type="number" id="cfg-max-avancado" class="form-control" step="0.1" min="0" max="10" value="10.0" style="font-weight: 700; width: 85px;">
+              </div>
+            </div>
+
+            <!-- Faixa: Adequado -->
+            <div style="background: #ffffff; border: 1px solid #bfdbfe; border-left: 5px solid #0284c7; border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-weight: 700; color: #0369a1; font-size: 0.95rem;">
+                  Nível Adequado
+                </label>
+                <span class="badge-status em-aplicacao">Adequado</span>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                Desenvolvimento satisfatório das competências e habilidades curriculares.
+              </p>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="number" id="cfg-min-adequado" class="form-control" step="0.1" min="0" max="10" value="7.0" style="font-weight: 700; width: 85px;">
+                <span style="font-weight: 600; color: var(--text-muted);">até</span>
+                <input type="number" id="cfg-max-adequado" class="form-control" step="0.1" min="0" max="10" value="7.9" style="font-weight: 700; width: 85px;">
+              </div>
+            </div>
+
+            <!-- Faixa: Básico -->
+            <div style="background: #ffffff; border: 1px solid #fde68a; border-left: 5px solid #d97706; border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-weight: 700; color: #92400e; font-size: 0.95rem;">
+                  Nível Básico
+                </label>
+                <span class="badge-status agendada">Básico</span>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                Atinge parcialmente as habilidades mínimas essenciais para a etapa.
+              </p>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="number" id="cfg-min-basico" class="form-control" step="0.1" min="0" max="10" value="6.0" style="font-weight: 700; width: 85px;">
+                <span style="font-weight: 600; color: var(--text-muted);">até</span>
+                <input type="number" id="cfg-max-basico" class="form-control" step="0.1" min="0" max="10" value="6.9" style="font-weight: 700; width: 85px;">
+              </div>
+            </div>
+
+            <!-- Faixa: Abaixo do Básico -->
+            <div style="background: #ffffff; border: 1px solid #fecaca; border-left: 5px solid #dc2626; border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-weight: 700; color: #991b1b; font-size: 0.95rem;">
+                  Abaixo do Básico (Intervenção)
+                </label>
+                <span class="badge-status intervencao">Abaixo do Básico</span>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                Estudante necessita de intervenção e apoio pedagógico imediato.
+              </p>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="number" id="cfg-min-abaixo" class="form-control" step="0.1" min="0" max="10" value="0.0" style="font-weight: 700; width: 85px;">
+                <span style="font-weight: 600; color: var(--text-muted);">até</span>
+                <input type="number" id="cfg-max-abaixo" class="form-control" step="0.1" min="0" max="10" value="5.9" style="font-weight: 700; width: 85px;">
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end;">
+            <button class="btn btn-primary" onclick="salvarParametrizacaoMediaNivel()">
+              Salvar Parametrização de Médias
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Aba 1.a: Seguranças -->
+      <div id="sub-config-seguranca" class="sub-config-content" style="display: none;">
+        <div class="content-card glass-panel" style="margin-bottom: 20px;">
+          <div class="content-card-header">
+            <h3>Políticas de Segurança & Conformidade LGPD</h3>
+            <span class="badge-tag primary">Ativo</span>
+          </div>
+
+          <div class="toggle-card-grid">
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Autenticação em Dois Fatores (2FA)</h4>
+                <p>Exigir código via SMS/E-mail para gestores e secretários.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sec-2fa" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Política de Senhas Fortes</h4>
+                <p>Mínimo 8 dígitos com números, letras maiúsculas e símbolos.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sec-senhas" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Bloqueio por Tentativas Incorretas</h4>
+                <p>Bloquear temporariamente após 5 erros sucessivos de senha.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sec-bloqueio" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Trilha de Auditoria e Logs Criptográficos</h4>
+                <p>Registrar todas as visualizações e emissões de boletins.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sec-auditoria" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Mascaramento de CPF / LGPD</h4>
+                <p>Ocultar dígitos centrais de CPFs para usuários sem privilégio total.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sec-mascaramento" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Backup Automático Diário em Nuvem</h4>
+                <p>Snapshot criptografado diário às 23:59 da base de Água Boa.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="sec-backup" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Aba 1.b: Habilitar e Desabilitar Funcionalidades -->
+      <div id="sub-config-funcionalidades" class="sub-config-content" style="display: none;">
+        <div class="content-card glass-panel">
+          <div class="content-card-header">
+            <h3>Gestão de Módulos e Funcionalidades Ativas</h3>
+            <span class="badge-tag success">Controle em Tempo Real</span>
+          </div>
+
+          <div class="toggle-card-grid">
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Módulo Painel Geral (Dashboard)</h4>
+                <p>Visão consolidada de KPIs municipais e telemetria.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="func-dashboard" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Módulo de Avaliações Diagnósticas</h4>
+                <p>Agendamento e aplicação de testes diagnósticos e formativos.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="func-avaliacoes" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Módulo Central de Cadastros</h4>
+                <p>Gestão de Usuários, Escolas, Alunos, Cargos, Turmas e Matrizes.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="func-cadastros" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Boletins Pedagógicos Online</h4>
+                <p>Acesso individualizado às matrizes de habilidades BNCC por estudante.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="func-boletins" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Exportação de Dados em CSV / Planilhas</h4>
+                <p>Permitir download dos relatórios tabulados para a SME.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="func-exportacao" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div class="toggle-info">
+                <h4>Integração em Tempo Real com SEDUC-MT / INEP</h4>
+                <p>Sincronização automática com a base estadual de Mato Grosso.</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="func-seduc" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MÓDULO: INSERIR NOTAS DOS ALUNOS -->
+    <!-- ========================================== -->
+    <div id="screen-notas" class="screen-view" style="display: none;">
+      <div class="screen-header">
+        <div>
+          <h2>Lançamento e Gestão de Notas dos Estudantes</h2>
+          <p class="section-desc">Seleção sequencial: Escolha a Escola ➔ Escolha a Turma ➔ Ano Letivo ➔ Lance e Edite as Notas dos Alunos com salvamento imediato.</p>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-secondary" onclick="carregarDadosModuloNotas()">
+            Recarregar Dados
+          </button>
+        </div>
+      </div>
+
+      <!-- PAINEL DE FILTROS SEQUENCIAIS (ESCOLA -> TURMA -> DISCIPLINA -> ANO -> BUSCA) -->
+      <div class="glass-panel panel-filtro-notas">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <h3 style="font-size: 0.95rem; color: var(--gov-primary); margin: 0; font-weight: 700;">
+            Filtros Pedagógicos para Lançamento de Notas
+          </h3>
+          <span style="font-size: 0.75rem; color: var(--text-dim);">Ciclo Letivo Ativo: 2026</span>
+        </div>
+
+        <div class="grid-filtros-notas">
+          <!-- 1. ESCOLHA DA ESCOLA -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              1. Unidade Escolar *
+            </label>
+            <select id="notas-filtro-escola" class="form-control form-control-compact" onchange="aoSelecionarEscolaNotas(this.value)">
+              <option value="">-- Selecione uma Escola --</option>
+            </select>
+          </div>
+
+          <!-- 2. ESCOLHA DA TURMA -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              2. Turma *
+            </label>
+            <select id="notas-filtro-turma" class="form-control form-control-compact" onchange="aoSelecionarTurmaNotas(this.value)" disabled>
+              <option value="">-- Escolha a Escola --</option>
+            </select>
+          </div>
+
+          <!-- 3. ESCOLHA DA DISCIPLINA / COMPONENTE CURRICULAR -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              3. Disciplina *
+            </label>
+            <select id="notas-filtro-disciplina" class="form-control form-control-compact" onchange="aoSelecionarDisciplinaNotas(this.value)">
+              <option value="todas">Todas as Disciplinas</option>
+              <option value="Língua Portuguesa">Língua Portuguesa (LP)</option>
+              <option value="Matemática">Matemática (MAT)</option>
+            </select>
+          </div>
+
+          <!-- 4. ANO LETIVO -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              4. Ano Letivo *
+            </label>
+            <select id="notas-filtro-ano-letivo" class="form-control form-control-compact" onchange="aoAlterarAnoLetivoNotas(this.value)">
+              <option value="2026" selected>2026 (Atual)</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+            </select>
+          </div>
+
+          <!-- 5. PESQUISAR ALUNO -->
+          <div class="form-group-custom">
+            <label class="label-filtro-compacto">
+              5. Buscar Aluno (Opcional)
+            </label>
+            <input type="text" id="notas-busca-aluno" class="form-control form-control-compact" placeholder="Nome, cód. ou INEP..." oninput="filtrarTabelaNotasAlunos(this.value)">
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD RESUMO E INFORMAÇÕES DA TURMA SELECIONADA -->
+      <div id="notas-turma-badge-resumo" class="glass-panel" style="padding: 10px 16px; margin-bottom: 14px; display: none; align-items: center; justify-content: space-between; border-left: 4px solid var(--gov-primary); border-radius: 10px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div>
+            <h4 id="notas-info-escola-turma" style="margin: 0; color: var(--gov-primary); font-size: 0.92rem; font-weight: 700;">Escola / Turma</h4>
+            <span id="notas-info-detalhe" style="font-size: 0.78rem; color: var(--text-muted);">Ano Letivo 2026</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span class="badge-tag primary" id="notas-total-estudantes-badge" style="font-size: 0.76rem; padding: 3px 8px;">0 Alunos</span>
+          <button class="btn btn-secondary" style="font-size: 0.76rem; padding: 5px 10px;" onclick="salvarTodasAsNotasEmMassa()">
+            Salvar Todas as Notas da Turma
+          </button>
+        </div>
+      </div>
+
+      <!-- LISTAGEM DOS ALUNOS COM CAMPOS DE NOTAS E AÇÕES -->
+      <div class="glass-panel" style="padding: 16px 20px; border-radius: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="margin: 0; color: var(--gov-primary); font-size: 1rem; font-weight: 700;">Lista de Alunos da Turma</h3>
+            <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: var(--text-muted);">Digite a nota diretamente nos campos ou clique em <strong>Editar</strong>. Clique em <strong>Salvar</strong> para registrar.</p>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--gov-primary); background: var(--gov-primary-light); padding: 6px 14px; border-radius: 20px; border: 1px solid #bfdbfe;">
+            Notas no formato 0 a 10 (Ex: 7,5 • 8,0 • 9,5). Atualiza automaticamente o nível de desempenho do aluno.
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="modern-table" id="tabela-notas-alunos">
+            <thead>
+              <tr>
+                <th style="width: 70px;">Cód.</th>
+                <th>Nome do Estudante</th>
+                <th>INEP</th>
+                <th id="th-col-lp" style="width: 130px; text-align: center;">Português LP (0 a 10)</th>
+                <th id="th-col-mat" style="width: 130px; text-align: center;">Matemática MAT (0 a 10)</th>
+                <th style="width: 130px; text-align: center;">Nível / Situação</th>
+                <th style="width: 160px; text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-notas-alunos">
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                  Selecione a Escola e a Turma acima para listar os alunos.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAIS DE CADASTRO E EDIÇÃO (2.a, b, c, d, e, f) -->
+  <!-- ========================================== -->
+
+  <!-- Modal: Cadastro / Edição de Usuário (2.a) -->
+  <div id="modal-cad-usuario" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-cad-usuario-titulo">Novo Cadastro de Usuário</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-cad-usuario')">&times;</button>
+      </div>
+      <form id="form-cad-usuario" onsubmit="salvarNovoUsuario(event)">
+        <input type="hidden" id="cad-usu-id">
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Código do Usuário (Sequencial)</label>
+            <input type="text" id="cad-usu-codigo" class="modal-input" placeholder="XXXX (Sequencial)" readonly style="background: #f1f5f9; font-family: monospace;">
+          </div>
+          <div class="modal-form-group">
+            <label>CPF (XXX.XXX.XXX - XX)</label>
+            <input type="text" id="cad-usu-cpf" class="modal-input" placeholder="Ex: 123.456.789 - 00" required>
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Nome Completo</label>
+          <input type="text" id="cad-usu-nome" class="modal-input" placeholder="Ex: Maria Pereira Silva" required>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Cargo (Cadastrado em Cargos)</label>
+            <select id="cad-usu-cargo" class="modal-select" required>
+              <option value="">Selecione um Cargo...</option>
+            </select>
+          </div>
+          <div class="modal-form-group">
+            <label>Telefone (XX XX X XXXX-XXXX)</label>
+            <input type="text" id="cad-usu-telefone" class="modal-input" placeholder="Ex: 66 99 9 9876-5432" required>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Endereço Completo</label>
+            <input type="text" id="cad-usu-endereco" class="modal-input" placeholder="Ex: Av. Araguaia, nº 500 - Centro, Água Boa - MT" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Perfil de Acesso / Permissões (RBAC)</label>
+            <select id="cad-usu-perfil" class="modal-select" required>
+              <option value="admin">Administrador (SEDUC / TI)</option>
+              <option value="coordenador">Coordenador Pedagógico</option>
+              <option value="diretor">Diretor / Secretário</option>
+              <option value="professor">Professor / Docente</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label>E-mail Institucional</label>
+          <input type="email" id="cad-usu-email" class="modal-input" placeholder="Ex: usuario@aguaboa.mt.gov.br" required>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-cad-usuario')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-usuario">Salvar Usuário</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Cadastro / Edição de Escola (2.b) -->
+  <div id="modal-cad-escola" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-cad-escola-titulo">Novo Cadastro de Escola</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-cad-escola')">&times;</button>
+      </div>
+      <form id="form-cad-escola" onsubmit="salvarNovaEscola(event)">
+        <input type="hidden" id="cad-esc-id">
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Código da Escola (Sequencial)</label>
+            <input type="text" id="cad-esc-codigo" class="modal-input" placeholder="XXX (Sequencial)" readonly style="background: #f1f5f9; font-family: monospace;">
+          </div>
+          <div class="modal-form-group">
+            <label>Telefone da Escola (XX XX X XXXX-XXXX)</label>
+            <input type="text" id="cad-esc-telefone" class="modal-input" placeholder="Ex: 66 34 6 8112-2200" required>
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Nome da Escola</label>
+          <input type="text" id="cad-esc-nome" class="modal-input" placeholder="Ex: EMEB São José Operário" required>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group" style="flex: 2;">
+            <label>Endereço (Rua/Av.)</label>
+            <input type="text" id="cad-esc-endereco" class="modal-input" placeholder="Ex: Av. Planalto" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Número</label>
+            <input type="text" id="cad-esc-numero" class="modal-input" placeholder="Ex: 1250" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Bairro</label>
+            <input type="text" id="cad-esc-bairro" class="modal-input" placeholder="Ex: Centro" required>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Código INEP (Opcional)</label>
+            <input type="text" id="cad-esc-inep" class="modal-input" placeholder="Ex: 51001299">
+          </div>
+          <div class="modal-form-group">
+            <label>Tipo de Polo / Zona</label>
+            <select id="cad-esc-tipo" class="modal-select">
+              <option value="Urbana">Urbana</option>
+              <option value="Campo">Polo do Campo (Rural)</option>
+              <option value="Indígena">Polo Indígena</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-cad-escola')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-escola">Cadastrar Escola</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Cadastro / Edição de Aluno (2.c) -->
+  <div id="modal-cad-aluno" class="modal-overlay">
+    <div class="modal-content" style="max-width: 780px; padding: 22px 26px;">
+      <div class="modal-header" style="margin-bottom: 14px; padding-bottom: 10px;">
+        <h3 id="modal-cad-aluno-titulo">Novo Cadastro de Aluno</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-cad-aluno')">&times;</button>
+      </div>
+      <form id="form-cad-aluno" onsubmit="salvarNovoAluno(event)">
+        <input type="hidden" id="cad-alu-id">
+        
+        <div class="modal-row" style="margin-bottom: 10px;">
+          <div class="modal-form-group" style="margin-bottom: 0;">
+            <label>Código da Escola</label>
+            <select id="cad-alu-escola-select" class="modal-select" onchange="atualizarNomeEscolaPorCodigo(this.value)" required>
+              <!-- Preenchido via JS com as escolas cadastradas -->
+            </select>
+          </div>
+          <div class="modal-form-group" style="margin-bottom: 0;">
+            <label>Nome da Escola</label>
+            <input type="text" id="cad-alu-escola-nome" class="modal-input" readonly style="background: #f1f5f9;">
+          </div>
+        </div>
+
+        <div class="modal-row" style="margin-bottom: 10px;">
+          <div class="modal-form-group" style="margin-bottom: 0;">
+            <label>Código do Aluno (Sequencial)</label>
+            <input type="text" id="cad-alu-codigo" class="modal-input" placeholder="XXXX" readonly style="background: #f1f5f9; font-family: monospace;">
+          </div>
+          <div class="modal-form-group" style="margin-bottom: 0;">
+            <label>Código INEP do Estudante</label>
+            <input type="text" id="cad-alu-inep" class="modal-input" placeholder="Ex: 12849588" required>
+          </div>
+        </div>
+
+        <div class="modal-form-group" style="margin-bottom: 10px;">
+          <label>Nome Completo do Aluno</label>
+          <input type="text" id="cad-alu-nome" class="modal-input" placeholder="Ex: Gabriel Henrique da Silva" required>
+        </div>
+
+        <div class="modal-row" style="margin-bottom: 10px;">
+          <div class="modal-form-group" style="margin-bottom: 0;">
+            <label>Nome do Responsável</label>
+            <input type="text" id="cad-alu-responsavel" class="modal-input" placeholder="Ex: Ana Paula da Silva" required>
+          </div>
+          <div class="modal-form-group" style="margin-bottom: 0;">
+            <label>Telefone do Responsável</label>
+            <input type="text" id="cad-alu-tel-resp" class="modal-input" placeholder="Ex: 66 99 9 9123-8877" required>
+          </div>
+        </div>
+
+        <div class="modal-form-group" style="margin-bottom: 10px;">
+          <label>Endereço Residencial do Aluno</label>
+          <input type="text" id="cad-alu-endereco" class="modal-input" placeholder="Ex: Rua 10, nº 250 - Setor Cristalino" required>
+        </div>
+
+        <div class="modal-row" style="grid-template-columns: 2fr 1fr 1fr; margin-bottom: 14px;">
+          <div class="modal-form-group" style="margin-bottom: 0;">
+            <label>Turma</label>
+            <select id="cad-alu-turma" class="modal-select" onchange="aoSelecionarTurmaAluno(this.value)" required>
+              <option value="">Selecione uma Turma</option>
+            </select>
+          </div>
+          <div class="modal-form-group" style="margin-bottom: 0;">
+            <label>Sala</label>
+            <input type="text" id="cad-alu-sala" class="modal-input" placeholder="Ex: Sala 04" required>
+          </div>
+          <div class="modal-form-group" style="margin-bottom: 0;">
+            <label>Turno</label>
+            <select id="cad-alu-turno" class="modal-select">
+              <option value="Matutino">Matutino</option>
+              <option value="Vespertino">Vespertino</option>
+              <option value="Integral">Integral</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-cad-aluno')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-aluno">Cadastrar Aluno</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Cadastro / Edição de Cargo (2.d) -->
+  <div id="modal-cad-cargo" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-cad-cargo-titulo">Cadastro de Cargo</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-cad-cargo')">&times;</button>
+      </div>
+      <form id="form-cad-cargo" onsubmit="salvarNovoCargo(event)">
+        <input type="hidden" id="cad-car-id">
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Código do Cargo</label>
+            <input type="text" id="cad-car-codigo" class="modal-input" placeholder="Gerado automaticamente (ex: CARG-011)" style="font-family: monospace;">
+          </div>
+          <div class="modal-form-group">
+            <label>Nome do Cargo</label>
+            <input type="text" id="cad-car-cargo" class="modal-input" placeholder="Ex: Coordenador Pedagógico, Professor Titular..." required>
+          </div>
+        </div>
+        <div class="modal-form-group">
+          <label>Departamento / Lotação</label>
+          <input type="text" id="cad-car-departamento" class="modal-input" value="Secretaria Municipal de Educação" required>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-cad-cargo')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-cargo">Salvar Cargo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Cadastro / Edição de Turma (2.e) -->
+  <div id="modal-cad-turma" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-cad-turma-titulo">Cadastro de Turma Escolar</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-cad-turma')">&times;</button>
+      </div>
+      <form id="form-cad-turma" onsubmit="salvarNovaTurma(event)">
+        <input type="hidden" id="cad-tur-id">
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Código da Escola (XXX)</label>
+            <select id="cad-tur-escola-select" class="modal-select" onchange="atualizarNomeEscolaTurmaPorCodigo(this.value)" required>
+              <!-- Preenchido via JS -->
+            </select>
+          </div>
+          <div class="modal-form-group">
+            <label>Nome da Escola</label>
+            <input type="text" id="cad-tur-escola-nome" class="modal-input" readonly style="background: #f1f5f9;">
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Período Letivo</label>
+            <input type="text" id="cad-tur-periodo" class="modal-input" value="2026 - Anual" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Modalidade</label>
+            <select id="cad-tur-modalidade" class="modal-select">
+              <option value="Ensino Fundamental Regular">Ensino Fundamental Regular</option>
+              <option value="Educação Infantil">Educação Infantil</option>
+              <option value="Educação do Campo">Educação do Campo</option>
+              <option value="Educação Escolar Indígena">Educação Escolar Indígena</option>
+              <option value="EJA">Educação de Jovens e Adultos (EJA)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Etapa</label>
+            <input type="text" id="cad-tur-etapa" class="modal-input" placeholder="Ex: Anos Iniciais (1º ao 5º)" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Identificação da Turma</label>
+            <input type="text" id="cad-tur-nome" class="modal-input" placeholder="Ex: 5º Ano C" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Turno</label>
+            <select id="cad-tur-turno" class="modal-select">
+              <option value="Matutino">Matutino</option>
+              <option value="Vespertino">Vespertino</option>
+              <option value="Integral">Integral</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-cad-turma')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-turma">Cadastrar Turma</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Cadastro / Edição de Matriz Curricular (2.f) -->
+  <div id="modal-cad-matriz" class="modal-overlay">
+    <div class="modal-content" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 id="modal-cad-matriz-titulo">Nova Disciplina / Matriz Curricular</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-cad-matriz')">&times;</button>
+      </div>
+      <form id="form-cad-matriz" onsubmit="salvarNovaMatriz(event)">
+        <input type="hidden" id="cad-mat-id">
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Código da Escola (XXX)</label>
+            <input type="text" id="cad-mat-escola-cod" class="modal-input" placeholder="Ex: 001" readonly style="background: #f1f5f9; font-family: monospace;">
+          </div>
+          <div class="modal-form-group">
+            <label>Nome da Escola</label>
+            <select id="cad-mat-escola-select" class="modal-select" onchange="aoMudarEscolaMatriz(this.value)" required>
+              <!-- Preenchido via JS com as escolas cadastradas -->
+            </select>
+          </div>
+        </div>
+
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Turma</label>
+            <select id="cad-mat-turma-select" class="modal-select" onchange="aoMudarTurmaMatriz(this.value)" required>
+              <!-- Preenchido via JS com as turmas cadastradas -->
+            </select>
+          </div>
+          <div class="modal-form-group">
+            <label>Sala</label>
+            <input type="text" id="cad-mat-sala" class="modal-input" placeholder="Ex: Sala 04" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Turno</label>
+            <select id="cad-mat-turno" class="modal-select">
+              <option value="Matutino">Matutino</option>
+              <option value="Vespertino">Vespertino</option>
+              <option value="Integral">Integral</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Nome da Disciplina</label>
+          <input type="text" id="cad-mat-nome" class="modal-input" placeholder="Ex: Língua Portuguesa" required>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-cad-matriz')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-matriz">Salvar Disciplina</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Nova Avaliação Diagnóstica -->
+  <div id="modal-nova-avaliacao" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Agendar Nova Avaliação Diagnóstica / Formativa</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-nova-avaliacao')">&times;</button>
+      </div>
+      <form id="form-nova-avaliacao" onsubmit="salvarNovaAvaliacao(event)">
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Código da Avaliação</label>
+            <input type="text" id="nova-ava-codigo" class="modal-input" placeholder="Ex: DIAG-2026-MAT2" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Componente Curricular</label>
+            <select id="nova-ava-componente" class="modal-select" required>
+              <option value="Língua Portuguesa">Língua Portuguesa</option>
+              <option value="Matemática">Matemática</option>
+              <option value="Ciências da Natureza">Ciências da Natureza</option>
+              <option value="Fluência em Leitura">Fluência em Leitura</option>
+              <option value="História & Geografia">História & Geografia</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Título Completo do Instrumento</label>
+          <input type="text" id="nova-ava-titulo" class="modal-input" placeholder="Ex: 2ª Avaliação Formativa de Matemática - Água Boa" required>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Ano / Série Escolar</label>
+            <select id="nova-ava-ano" class="modal-select" required>
+              <option value="2º Ano EF">2º Ano EF (Alfabetização)</option>
+              <option value="3º Ano EF">3º Ano EF</option>
+              <option value="4º Ano EF">4º Ano EF</option>
+              <option value="5º Ano EF" selected>5º Ano EF (Anos Iniciais)</option>
+              <option value="6º Ano EF">6º Ano EF</option>
+              <option value="7º Ano EF">7º Ano EF</option>
+              <option value="8º Ano EF">8º Ano EF</option>
+              <option value="9º Ano EF">9º Ano EF (Anos Finais)</option>
+            </select>
+          </div>
+          <div class="modal-form-group">
+            <label>Tipo de Avaliação</label>
+            <select id="nova-ava-tipo" class="modal-select" required>
+              <option value="Diagnóstica">Diagnóstica</option>
+              <option value="Formativa">Formativa</option>
+              <option value="Somativa">Somativa</option>
+              <option value="Simulado SAEB">Simulado SAEB</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Data de Início da Aplicação</label>
+            <input type="date" id="nova-ava-inicio" class="modal-input" value="2026-05-02" required>
+          </div>
+          <div class="modal-form-group">
+            <label>Data Limite / Fim</label>
+            <input type="date" id="nova-ava-fim" class="modal-input" value="2026-05-20" required>
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Quantidade de Itens / Questões (Matriz BNCC)</label>
+          <input type="number" id="nova-ava-itens" class="modal-input" value="22" min="1" max="60" required>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-nova-avaliacao')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar e Publicar Prova</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Boletim Pedagógico Individual -->
+  <div id="modal-boletim-aluno" class="modal-overlay">
+    <div class="modal-content" style="max-width: 720px;">
+      <div class="modal-header">
+        <h3>Boletim Diagnóstico Individual do Estudante</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-boletim-aluno')">&times;</button>
+      </div>
+
+      <div id="boletim-corpo-conteudo"></div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="window.print()">Imprimir Boletim</button>
+        <button class="btn btn-primary" onclick="fecharModal('modal-boletim-aluno')">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Editar Nota do Estudante -->
+  <div id="modal-editar-nota-aluno" class="modal-overlay">
+    <div class="modal-content" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3>Lançamento e Edição de Notas do Estudante</h3>
+        <button class="btn-close-modal" onclick="fecharModal('modal-editar-nota-aluno')">&times;</button>
+      </div>
+
+      <form id="form-editar-nota-modal" onsubmit="salvarNotaModalAluno(event)">
+        <input type="hidden" id="edit-modal-aluno-id">
+
+        <div style="background: var(--bg-surface-secondary); padding: 14px; border-radius: 10px; margin-bottom: 18px; border: 1px solid var(--border-light);">
+          <div style="font-size: 1.05rem; font-weight: 700; color: var(--gov-primary);" id="edit-modal-aluno-nome">Nome do Aluno</div>
+          <div style="display: flex; gap: 16px; font-size: 0.82rem; color: var(--text-muted); margin-top: 6px;">
+            <span>Escola: <strong id="edit-modal-aluno-escola" style="color: var(--text-main);">-</strong></span>
+            <span>Turma: <strong id="edit-modal-aluno-turma" style="color: var(--text-main);">-</strong></span>
+            <span>Cód: <strong id="edit-modal-aluno-cod" style="color: var(--gov-primary);">-</strong></span>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group">
+            <label>Ano Letivo</label>
+            <input type="text" id="edit-modal-ano-letivo" class="modal-input" value="2026" readonly style="background: #f1f5f9;">
+          </div>
+          <div class="modal-form-group">
+            <label>Português - LP (0 a 10)</label>
+            <input type="text" id="edit-modal-nota-lp" class="modal-input" placeholder="Ex: 7,5 ou 8.5" required>
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Matemática - MAT (0 a 10)</label>
+          <input type="text" id="edit-modal-nota-mat" class="modal-input" placeholder="Ex: 8,0 ou 9.0" required>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Observação Pedagógica / Parecer (Opcional)</label>
+          <input type="text" id="edit-modal-obs" class="modal-input" placeholder="Ex: Excelente evolução na interpretação de texto...">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModal('modal-editar-nota-aluno')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Nota</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CONTAINER DE NOTIFICAÇÕES TOAST -->
+  <div id="toast-container"></div>
+
+  <!-- SCRIPT REATIVO SPA -->
+  <script src="/static/app.js?v=10"></script>
+</body>
+</html>
