@@ -894,6 +894,12 @@ function abrirModalCadAluno() {
   document.getElementById('form-cad-aluno').reset();
   const inepInput = document.getElementById('cad-alu-inep');
   if (inepInput) inepInput.value = '';
+  const respInput = document.getElementById('cad-alu-responsavel');
+  if (respInput) respInput.value = '';
+  const endInput = document.getElementById('cad-alu-endereco');
+  if (endInput) endInput.value = '';
+  const telInput = document.getElementById('cad-alu-tel-resp');
+  if (telInput) telInput.value = '';
   popularSelectEscolas(listaEscolasGlobal);
   const maxCod = listaAlunosGlobal.reduce((max, a) => {
     const cod = a.codigo_aluno || a.codigo;

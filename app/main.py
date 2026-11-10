@@ -298,11 +298,11 @@ class AlunoCadastro(BaseModel):
     codigo_escola: str
     nome_escola: str
     codigo_aluno: str
-    codigo_inep: str
+    codigo_inep: Optional[str] = ""
     nome: str
-    nome_responsavel: str
-    endereco: str
-    telefone_responsavel: str
+    nome_responsavel: Optional[str] = ""
+    endereco: Optional[str] = ""
+    telefone_responsavel: Optional[str] = ""
     turma: str
     sala: str
     turno: str
@@ -319,11 +319,11 @@ class AlunoCadastro(BaseModel):
 class NovoAlunoCadastroDTO(BaseModel):
     codigo_escola: str
     nome_escola: str
-    codigo_inep: str
+    codigo_inep: Optional[str] = ""
     nome: str
-    nome_responsavel: str
-    endereco: str
-    telefone_responsavel: str
+    nome_responsavel: Optional[str] = ""
+    endereco: Optional[str] = ""
+    telefone_responsavel: Optional[str] = ""
     turma: str
     sala: str
     turno: str
