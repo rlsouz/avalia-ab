@@ -68,13 +68,13 @@ function responderMockDemo(urlStr, opcoes = {}) {
     return jsonResponse({
       kpis: {
         total_escolas: escolas.length,
-        total_turmas: turmas.length || 24,
-        total_estudantes: 631,
-        taxa_participacao: "96.5%",
-        nota_media_lp: 8.9,
-        nota_media_mat: 8.5,
-        proficiencia_media_lp: 266.3,
-        proficiencia_media_mat: 261.2
+        total_turmas: turmas.length || 0,
+        total_estudantes: alunos.length || 0,
+        taxa_participacao: (alunos.length > 0 && avaliacoes.length > 0) ? "96.5%" : "0.0%",
+        nota_media_lp: alunos.length > 0 ? 8.9 : 0.0,
+        nota_media_mat: alunos.length > 0 ? 8.5 : 0.0,
+        proficiencia_media_lp: alunos.length > 0 ? 266.3 : 0.0,
+        proficiencia_media_mat: alunos.length > 0 ? 261.2 : 0.0
       },
       avaliacoes_recentes: avaliacoes,
       top_escolas: escolas,

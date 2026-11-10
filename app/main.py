@@ -201,7 +201,7 @@ class MetricasMunicipais(BaseModel):
     total_estudantes: int = 0
     total_escolas: int = 0
     total_turmas: int = 0
-    taxa_participacao: str = "100.0%"
+    taxa_participacao: str = "0.0%"
     proficiencia_media_lp: float = 0.0
     proficiencia_media_mat: float = 0.0
     nota_media_lp: float = 0.0
@@ -280,7 +280,7 @@ class EscolaCadastro(BaseModel):
     proficiencia_mat: float = 0.0
     nota_media_lp: float = 0.0
     nota_media_mat: float = 0.0
-    taxa_participacao: str = "100.0%"
+    taxa_participacao: str = "0.0%"
     status: str = "Ativo"
 
 class NovaEscolaCadastroDTO(BaseModel):
@@ -591,16 +591,29 @@ def obter_metricas():
     p_adequado = round((niveis_dict.get("Adequado", 0) / total_niveis) * 100, 1) if total_niveis > 0 else 0.0
     p_avancado = round((niveis_dict.get("Avançado", 0) / total_niveis) * 100, 1) if total_niveis > 0 else 0.0
 
-    conn.close()
-
+    # Calcular taxa de participação real da rede
     total_estudantes = total_alunos_escolas if total_alunos_escolas > 0 else total_alunos
     nota_lp = round(float(avg_lp), 1) if avg_lp is not None else 0.0
     nota_mat = round(float(avg_mat), 1) if avg_mat is not None else 0.0
+
+    taxa_part_str = "0.0%"
+    if total_estudantes > 0:
+        cursor.execute("SELECT COALESCE(SUM(total_inscritos), 0), COALESCE(SUM(total_avaliados), 0) FROM avaliacoes")
+        row_av = cursor.fetchone()
+        tot_inscritos, tot_avaliados = (row_av[0] or 0), (row_av[1] or 0)
+        if tot_inscritos > 0:
+            taxa_calc = (tot_avaliados / tot_inscritos) * 100.0
+            taxa_part_str = f"{min(100.0, round(taxa_calc, 1)):.1f}%"
+        else:
+            taxa_part_str = "0.0%"
+
+    conn.close()
 
     return MetricasMunicipais(
         total_estudantes=total_estudantes,
         total_escolas=total_escolas,
         total_turmas=total_turmas_escolas,
+        taxa_participacao=taxa_part_str,
         nota_media_lp=nota_lp,
         nota_media_mat=nota_mat,
         proficiencia_media_lp=nota_lp,
