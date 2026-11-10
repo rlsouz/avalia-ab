@@ -1217,10 +1217,18 @@ def cadastrar_aluno(dados: NovoAlunoCadastroDTO):
     sanitizar_dto_entrada(dados)
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT MAX(id) FROM alunos")
-    max_id = cursor.fetchone()[0] or 0
-    novo_id = max_id + 1
-    codigo_seq = f"{novo_id:04d}"
+    cursor.execute("SELECT codigo_aluno FROM alunos")
+    cods_existentes = cursor.fetchall()
+    max_num = 0
+    for row in cods_existentes:
+        cod_val = row[0] if isinstance(row, (list, tuple)) else (row["codigo_aluno"] if hasattr(row, "__getitem__") else None)
+        try:
+            val_int = int(str(cod_val).strip())
+            if val_int > max_num:
+                max_num = val_int
+        except (ValueError, TypeError):
+            pass
+    codigo_seq = f"{(max_num + 1):04d}" 
 
     nota_lp = max(0.0, min(10.0, round(float(dados.nota_lp or 8.0), 1)))
     nota_mat = max(0.0, min(10.0, round(float(dados.nota_mat or 8.0), 1)))

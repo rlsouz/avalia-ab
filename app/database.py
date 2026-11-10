@@ -146,6 +146,10 @@ class PostgresCursorWrapper:
             flags=re.IGNORECASE,
         )
 
+        # Escapa caracteres de porcentagem literais ('%') duplicando-os para '%%' caso existam no SQL
+        # para que o psycopg não tente interpretá-los como placeholders de formato (ex: '100%' -> '100%%')
+        s = s.replace("%", "%%")
+
         # Substitui placeholders '?' por '%s'
         s = s.replace("?", "%s")
 

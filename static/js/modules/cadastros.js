@@ -892,6 +892,8 @@ function abrirModalCadAluno() {
   document.getElementById('modal-cad-aluno-titulo').textContent = 'Novo Cadastro de Aluno';
   document.getElementById('cad-alu-id').value = '';
   document.getElementById('form-cad-aluno').reset();
+  const inepInput = document.getElementById('cad-alu-inep');
+  if (inepInput) inepInput.value = '';
   popularSelectEscolas(listaEscolasGlobal);
   const maxCod = listaAlunosGlobal.reduce((max, a) => {
     const cod = a.codigo_aluno || a.codigo;
