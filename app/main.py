@@ -16,6 +16,8 @@ from app.security import (
     verificar_senha_segura,
     simular_verificacao_anti_timing,
     validar_forca_senha,
+    validar_cpf,
+    validar_telefone,
     gerar_token_sessao,
     revogar_token_sessao,
     extrair_sessao_requisicao,
@@ -525,11 +527,12 @@ def recalcular_medias_rede():
         prof_lp = round(float(prof_lp), 1) if prof_lp is not None else avg_lp
         prof_mat = round(float(prof_mat), 1) if prof_mat is not None else avg_mat
 
+        taxa_part_esc = "0.0%" if total_alunos_escola == 0 else "100.0%"
         cursor.execute("""
             UPDATE escolas 
-            SET total_turmas = ?, total_alunos = ?, nota_media_lp = ?, nota_media_mat = ?, proficiencia_lp = ?, proficiencia_mat = ?
+            SET total_turmas = ?, total_alunos = ?, nota_media_lp = ?, nota_media_mat = ?, proficiencia_lp = ?, proficiencia_mat = ?, taxa_participacao = ?
             WHERE id = ?
-        """, (turmas_count, total_alunos_escola, avg_lp, avg_mat, prof_lp, prof_mat, esc_id))
+        """, (turmas_count, total_alunos_escola, avg_lp, avg_mat, prof_lp, prof_mat, taxa_part_esc, esc_id))
 
     conn.commit()
     conn.close()
@@ -985,6 +988,10 @@ def listar_usuarios_cadastrados():
 @app.post("/api/v1/cadastros/usuarios", response_model=Usuario, status_code=201)
 def cadastrar_usuario(dados: NovoUsuarioDTO):
     sanitizar_dto_entrada(dados)
+    if not validar_cpf(dados.cpf):
+        raise HTTPException(status_code=400, detail="CPF inválido. Informe um CPF válido com 11 dígitos.")
+    if not validar_telefone(dados.telefone):
+        raise HTTPException(status_code=400, detail="Telefone inválido. Informe DDD + número (10 ou 11 dígitos).")
     if dados.senha and dados.senha.strip():
         cfg_seg = obter_config_db("seguranca", ConfiguracoesSeguranca())
         erro_forca = validar_forca_senha(dados.senha, exigir_forte=cfg_seg.politica_senhas_fortes)
@@ -1019,6 +1026,10 @@ def cadastrar_usuario(dados: NovoUsuarioDTO):
 @app.put("/api/v1/cadastros/usuarios/{usuario_id}", response_model=Usuario)
 def atualizar_usuario(usuario_id: int, dados: NovoUsuarioDTO):
     sanitizar_dto_entrada(dados)
+    if not validar_cpf(dados.cpf):
+        raise HTTPException(status_code=400, detail="CPF inválido. Informe um CPF válido com 11 dígitos.")
+    if not validar_telefone(dados.telefone):
+        raise HTTPException(status_code=400, detail="Telefone inválido. Informe DDD + número (10 ou 11 dígitos).")
     if dados.senha and dados.senha.strip():
         cfg_seg = obter_config_db("seguranca", ConfiguracoesSeguranca())
         erro_forca = validar_forca_senha(dados.senha, exigir_forte=cfg_seg.politica_senhas_fortes)
@@ -1181,24 +1192,48 @@ def excluir_escola(escola_id: int):
 
 # 3. Alunos
 @app.get("/api/v1/cadastros/alunos", response_model=List[AlunoCadastro])
-def listar_alunos_cadastrados():
+def listar_alunos_cadastrados(request: Request):
+    sessao = getattr(request.state, "usuario_sessao", {}) or {}
+    perfil = (sessao.get("perfil") or "").lower()
+    escola_vinculo = (sessao.get("escola_vinculo") or "").strip()
+
+    if perfil == "professor" and not escola_vinculo:
+        raise HTTPException(status_code=403, detail="Acesso negado: Perfil Professor sem escola vinculada.")
+
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM alunos ORDER BY id ASC")
+    if perfil in ("professor", "diretor") and escola_vinculo:
+        cursor.execute(
+            "SELECT * FROM alunos WHERE (lower(nome_escola) = lower(?) OR codigo_escola = ?) ORDER BY id ASC",
+            (escola_vinculo, escola_vinculo)
+        )
+    else:
+        cursor.execute("SELECT * FROM alunos ORDER BY id ASC")
     rows = [dict(r) for r in cursor.fetchall()]
     conn.close()
     return rows
 
 @app.get("/api/v1/alunos", response_model=List[AlunoCadastro])
 def listar_alunos_compat(
+    request: Request,
     escola: Optional[str] = Query(None),
     termo: Optional[str] = Query(None)
 ):
+    sessao = getattr(request.state, "usuario_sessao", {}) or {}
+    perfil = (sessao.get("perfil") or "").lower()
+    escola_vinculo = (sessao.get("escola_vinculo") or "").strip()
+
+    if perfil == "professor" and not escola_vinculo:
+        raise HTTPException(status_code=403, detail="Acesso negado: Perfil Professor sem escola vinculada.")
+
     conn = get_db_connection()
     cursor = conn.cursor()
     query = "SELECT * FROM alunos WHERE 1=1"
     params = []
-    if escola and escola != "todos":
+    if perfil in ("professor", "diretor") and escola_vinculo:
+        query += " AND (lower(nome_escola) = lower(?) OR codigo_escola = ?)"
+        params.extend([escola_vinculo, escola_vinculo])
+    elif escola and escola != "todos":
         query += " AND (lower(nome_escola) = lower(?) OR codigo_escola = ?)"
         params.extend([escola, escola])
     if termo:
@@ -1397,16 +1432,41 @@ def obter_boletim_aluno(aluno_id: int):
     
     aluno = dict(row)
 
-    default_dominadas = [
-        {"codigo": "EF05LP01", "descricao": "Identificar a ideia central do texto e inferir sentido de palavras"},
-        {"codigo": "EF05MA01", "descricao": "Ler, escrever e ordenar números naturais até a ordem das centenas de milhar"}
-    ]
-    default_desenvolvimento = [
-        {"codigo": "EF05LP04", "descricao": "Diferenciar discurso direto e indireto em narrativas ficcionais"}
-    ]
-    default_intervencao = [
-        {"codigo": "EF05LP15", "descricao": "Distinguir fato de opinião em textos jornalísticos"}
-    ]
+    turma_str = str(aluno.get("turma") or "")
+    m_ano = re.search(r"(\d+)", turma_str)
+    ano_num = int(m_ano.group(1)) if m_ano else 1
+    ano_num = max(1, min(9, ano_num))
+    ano_cod = f"{ano_num:02d}"
+
+    nota_lp_val = float(aluno.get("nota_lp") or 0.0)
+    nota_mat_val = float(aluno.get("nota_mat") or 0.0)
+    media_geral = (nota_lp_val + nota_mat_val) / 2.0
+
+    if media_geral >= 6.0:
+        default_dominadas = [
+            {"codigo": f"EF{ano_cod}LP01", "descricao": "Compreensão e interpretação de textos adequados ao ano escolar"},
+            {"codigo": f"EF{ano_cod}MA01", "descricao": "Resolução de problemas e operações numéricas previstas para o ano"}
+        ]
+        default_desenvolvimento = [
+            {"codigo": f"EF{ano_cod}LP04", "descricao": "Ampliação de vocabulário e leitura autônoma"}
+        ]
+        default_intervencao = []
+    elif media_geral > 0.0:
+        default_dominadas = []
+        default_desenvolvimento = [
+            {"codigo": f"EF{ano_cod}LP01", "descricao": "Compreensão inicial de textos adequados ao ano escolar"}
+        ]
+        default_intervencao = [
+            {"codigo": f"EF{ano_cod}MA01", "descricao": "Reforço em operações básicas e resolução de problemas"}
+        ]
+    else:
+        default_dominadas = []
+        default_desenvolvimento = []
+        default_intervencao = [
+            {"codigo": f"EF{ano_cod}LP01", "descricao": "Acompanhamento diagnóstico inicial em Língua Portuguesa"},
+            {"codigo": f"EF{ano_cod}MA01", "descricao": "Acompanhamento diagnóstico inicial em Matemática"}
+        ]
+
     default_parecer = (
         "Reforçar atividades de leitura compartilhada com foco em compreensão textual.\n"
         "Utilizar materiais pedagógicos para resolução de problemas matemáticos."
@@ -1748,8 +1808,8 @@ def obter_distribuicao_niveis():
 @app.get("/api/v1/relatorios/evolucao-historica")
 def obter_evolucao_historica():
     metricas = obter_metricas()
-    lp = metricas.nota_media_lp if metricas.nota_media_lp > 0 else 7.8
-    mat = metricas.nota_media_mat if metricas.nota_media_mat > 0 else 8.1
+    lp = metricas.nota_media_lp
+    mat = metricas.nota_media_mat
     return {
         "ciclos": ["2023 - Saída", "2024 - Diagnóstica", "2024 - Saída", "2025 - Diagnóstica", "2025 - Saída", "2026 - Atual"],
         "lingua_portuguesa": [6.2, 6.5, 6.9, 7.2, 7.5, lp],

@@ -1660,3 +1660,9 @@ input:checked + .slider:before {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Espaço extra no final para evitar que o rodapé fixo cubra botões inferiores */
+main, .app-main, #main-content {
+  padding-bottom: 90px !important;
+}

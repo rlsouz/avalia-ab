@@ -121,20 +121,36 @@ def simular_verificacao_anti_timing(senha_informada: str):
 def validar_forca_senha(senha: str, exigir_forte: bool = True) -> Optional[str]:
     """Valida a senha conforme diretrizes NIST SP 800-63B e OWASP ASVS."""
     s = (senha or "").strip()
-    if len(s) < 6:
-        return "A senha deve ter pelo menos 6 caracteres."
     if len(s) > 128:
         return "A senha excede o limite máximo de 128 caracteres."
     if s.lower() in SENHAS_COMUNS_BLOQUEADAS:
         return "Esta senha é muito comum e insegura. Escolha uma senha mais forte."
     if exigir_forte:
-        if len(s) < 8:
-            return "Política de Senhas Fortes ativa: a senha deve conter no mínimo 8 caracteres."
         tem_letra = any(c.isalpha() for c in s)
         tem_numero = any(c.isdigit() for c in s)
-        if not (tem_letra and tem_numero):
-            return "Política de Senhas Fortes ativa: a senha deve combinar letras e números."
+        if len(s) < 8 or not (tem_letra and tem_numero):
+            return "Política de Senhas Fortes: a senha deve conter no mínimo 8 caracteres, combinando letras e números."
+    elif len(s) < 6:
+        return "A senha deve ter pelo menos 6 caracteres."
     return None
+
+
+def validar_cpf(cpf: str) -> bool:
+    """Valida CPF brasileiro (11 dígitos, rejeita sequências repetidas e confere dígitos verificadores)."""
+    digitos = re.sub(r"\D", "", cpf or "")
+    if len(digitos) != 11 or digitos == digitos[0] * 11:
+        return False
+    soma1 = sum(int(digitos[i]) * (10 - i) for i in range(9))
+    dv1 = (soma1 * 10 % 11) % 10
+    soma2 = sum(int(digitos[i]) * (11 - i) for i in range(10))
+    dv2 = (soma2 * 10 % 11) % 10
+    return digitos[-2:] == f"{dv1}{dv2}"
+
+
+def validar_telefone(tel: str) -> bool:
+    """Valida telefone brasileiro (mínimo 10 dígitos numéricos com DDD)."""
+    digitos = re.sub(r"\D", "", tel or "")
+    return 10 <= len(digitos) <= 11
 
 
 # =====================================================================
@@ -402,12 +418,15 @@ def verificar_permissao_rbac_rota(path: str, method: str, perfil: str) -> Option
     if path.startswith("/api/v1/auditoria") and p != "admin":
         return "Acesso negado pelo Servidor: A Trilha de Auditoria LGPD é restrita a Administradores."
 
+    if path.startswith("/api/v1/configuracoes/seguranca") and p != "admin":
+        return "Acesso negado pelo Servidor: Configurações de segurança são restritas a Administradores."
+
     if path.startswith("/api/v1/configuracoes") and m in ("POST", "PUT", "DELETE") and p != "admin":
         return "Acesso negado pelo Servidor: Apenas Administradores podem alterar configurações do sistema."
 
-    # 3. Gestão de Contas de Usuários: Criação/Edição/Exclusão apenas Admin
-    if path.startswith("/api/v1/cadastros/usuarios") and m in ("POST", "PUT", "DELETE") and p != "admin":
-        return "Acesso negado pelo Servidor: Apenas Administradores podem cadastrar ou alterar contas de usuários."
+    # 3. Gestão de Contas de Usuários: Leitura, Criação, Edição e Exclusão apenas Admin (proteção LGPD de CPF/contatos)
+    if path.startswith("/api/v1/cadastros/usuarios") and p != "admin":
+        return "Acesso negado pelo Servidor: Apenas Administradores podem consultar ou gerenciar contas de usuários."
 
     # 4. Perfil Professor não pode alterar cadastros estruturais (Escolas, Turmas, Alunos, Cargos, Matriz)
     if p == "professor" and path.startswith("/api/v1/cadastros/") and not path.endswith("/notas") and m in ("POST", "PUT", "DELETE"):

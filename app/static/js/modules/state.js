@@ -934,9 +934,7 @@ async function submeterLoginPlataforma(event) {
     }
 
     const usuario = await res.json();
-    if (usuario.token) {
-      localStorage.setItem('avalia_ab_token', usuario.token);
-    }
+
     usuarioLogadoGlobal = usuario;
     localStorage.setItem('avalia_ab_usuario', JSON.stringify(usuario));
     localStorage.removeItem('avalia_ab_sessao_encerrada');
