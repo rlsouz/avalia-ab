@@ -28,6 +28,19 @@
 
   <!-- TELA INICIAL INSTITUCIONAL E PORTAL DE LOGON -->
   <div id="modal-login-usuario" class="landing-portal-overlay active" data-bloqueado="true">
+  <script>
+    (function() {
+      try {
+        if (localStorage.getItem('avalia_ab_sessao_encerrada') !== 'true' && (localStorage.getItem('avalia_ab_usuario') || localStorage.getItem('avalia_ab_token'))) {
+          var m = document.getElementById('modal-login-usuario');
+          if (m) {
+            m.classList.remove('active');
+            m.setAttribute('data-bloqueado', 'false');
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
     <div class="landing-portal-container">
 
       <!-- COLUNA ESQUERDA: APRESENTAÇÃO INSTITUCIONAL DA PLATAFORMA AVALIA AB -->

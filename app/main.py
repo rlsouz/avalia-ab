@@ -571,7 +571,6 @@ def healthcheck():
 # --- PAINEL GERAL (DASHBOARD) ---
 @app.get("/api/v1/metricas", response_model=MetricasMunicipais)
 def obter_metricas():
-    recalcular_medias_rede()
     conn = get_db_connection()
     cursor = conn.cursor()
 
