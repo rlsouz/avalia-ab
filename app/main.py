@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import sqlite3
 import hashlib
@@ -564,11 +565,7 @@ def salvar_config_db(chave: str, obj: BaseModel):
 def healthcheck():
     return {
         "status": "online",
-        "platform": "AVALIA AB",
-        "database": "PostgreSQL",
-        "database_status": STATUS_BANCO_ATUAL,
-        "city": "Água Boa - MT",
-        "version": "3.0.0"
+        "platform": "AVALIA AB"
     }
 
 # --- PAINEL GERAL (DASHBOARD) ---
@@ -878,6 +875,7 @@ def autenticar_usuario(dados: LoginUsuarioDTO, request: Request, response: Respo
         value=token,
         max_age=duracao_min * 60,
         httponly=True,
+        secure=(request.url.scheme == "https" or bool(os.environ.get("RENDER"))),
         samesite="strict",
         path="/",
     )
@@ -1089,7 +1087,6 @@ def excluir_usuario(usuario_id: int):
 # 2. Escolas
 @app.get("/api/v1/cadastros/escolas", response_model=List[EscolaCadastro])
 def listar_escolas_cadastradas():
-    recalcular_medias_rede()
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM escolas ORDER BY id ASC")
@@ -1620,7 +1617,6 @@ def excluir_cargo(cargo_id: int):
 # 5. Turmas
 @app.get("/api/v1/cadastros/turmas", response_model=List[TurmaCadastro])
 def listar_turmas_cadastradas():
-    recalcular_medias_rede()
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM turmas ORDER BY id ASC")

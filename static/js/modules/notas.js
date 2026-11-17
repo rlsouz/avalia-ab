@@ -190,9 +190,7 @@ function atualizarListaAlunosNotas() {
     return escolaMatch && turmaMatch;
   });
 
-  if (alunosFiltrados.length === 0) {
-    alunosFiltrados = listaAlunosGlobal.filter(a => (a.codigo_escola === codEscola) || (a.nome_escola.toLowerCase() === nomeEscola.toLowerCase()));
-  }
+
 
   listaAlunosNotasAtual = alunosFiltrados;
 
@@ -237,9 +235,9 @@ function renderizarTabelaAlunosNotas(alunos) {
   }
 
   tbody.innerHTML = alunos.map(a => {
-    const notaLP = (a.nota_lp !== undefined && a.nota_lp !== null) ? a.nota_lp.toFixed(1) : '8.0';
-    const notaMAT = (a.nota_mat !== undefined && a.nota_mat !== null) ? a.nota_mat.toFixed(1) : '8.0';
-    const notaCIE = (a.nota_ciencias !== undefined && a.nota_ciencias !== null) ? a.nota_ciencias.toFixed(1) : '8.0';
+    const notaLP = (a.nota_lp !== undefined && a.nota_lp !== null) ? Number(a.nota_lp).toFixed(1) : '';
+    const notaMAT = (a.nota_mat !== undefined && a.nota_mat !== null) ? Number(a.nota_mat).toFixed(1) : '';
+    const notaCIE = (a.nota_ciencias !== undefined && a.nota_ciencias !== null) ? Number(a.nota_ciencias).toFixed(1) : '';
 
     let nivelBadgeClass = 'concluida';
     if (a.nivel_lp === 'Abaixo do Básico' || a.nivel_mat === 'Abaixo do Básico') nivelBadgeClass = 'intervencao';
@@ -393,29 +391,60 @@ async function salvarTodasAsNotasEmMassa() {
   }
 
   let salvos = 0;
+  let erros = 0;
   for (const a of listaAlunosNotasAtual) {
     const inputLP = document.getElementById(`input-nota-lp-${a.id}`);
     const inputMAT = document.getElementById(`input-nota-mat-${a.id}`);
 
     if (inputLP && inputMAT) {
+      const valLPStr = (inputLP.value || '').trim().replace(',', '.');
+      const valMATStr = (inputMAT.value || '').trim().replace(',', '.');
+      if (valLPStr === '' && valMATStr === '') continue;
+
+      const numLP = valLPStr === '' ? 0 : parseFloat(valLPStr);
+      const numMAT = valMATStr === '' ? 0 : parseFloat(valMATStr);
+      if (isNaN(numLP) || numLP < 0 || numLP > 10 || isNaN(numMAT) || numMAT < 0 || numMAT > 10) {
+        mostrarToast(`Nota inválida para ${a.nome}: informe valores entre 0,0 e 10,0.`, 'erro');
+        return;
+      }
+
+      const origLP = a.nota_lp !== undefined && a.nota_lp !== null ? Number(a.nota_lp).toFixed(1) : '';
+      const origMAT = a.nota_mat !== undefined && a.nota_mat !== null ? Number(a.nota_mat).toFixed(1) : '';
+      if (valLPStr === origLP && valMATStr === origMAT) continue;
+
       try {
-        await fetch(`/api/v1/cadastros/alunos/${a.id}/notas`, {
+        const res = await fetch(`/api/v1/cadastros/alunos/${a.id}/notas`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            nota_lp: converterNotaParaNumero(inputLP.value),
-            nota_mat: converterNotaParaNumero(inputMAT.value),
+            nota_lp: Math.round(numLP * 10) / 10,
+            nota_mat: Math.round(numMAT * 10) / 10,
             ano_letivo: anoLetivoNotas
           })
         });
-        salvos++;
+        if (!res.ok) {
+          erros++;
+          if (res.status === 401 || res.status === 403) {
+            mostrarToast('Sessão expirada ou sem permissão. Faça login novamente.', 'erro');
+            return;
+          }
+        } else {
+          salvos++;
+        }
       } catch (e) {
+        erros++;
         console.error(e);
       }
     }
   }
 
-  mostrarToast(`Sucesso: ${salvos} notas da turma foram salvas!`);
+  if (erros > 0) {
+    mostrarToast(`Atenção: ${salvos} salvas, ${erros} falharam ao gravar no servidor.`, 'erro');
+  } else if (salvos > 0) {
+    mostrarToast(`Sucesso: ${salvos} notas alteradas foram salvas!`);
+  } else {
+    mostrarToast('Nenhuma alteração de nota detectada.');
+  }
   atualizarListaAlunosNotas();
 }
 

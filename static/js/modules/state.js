@@ -455,20 +455,15 @@ function responderMockDemo(urlStr, opcoes = {}) {
       opcoes.credentials = 'same-origin';
       const headers = new Headers(opcoes.headers || {});
       headers.set('X-Requested-With', 'XMLHttpRequest');
-      const tokenSalvo = localStorage.getItem('avalia_ab_token');
-      if (tokenSalvo && !headers.has('Authorization')) {
-        headers.set('Authorization', `Bearer ${tokenSalvo}`);
-      }
       opcoes.headers = headers;
 
       try {
-        const resposta = await fetchOriginal(input, opcoes);
-        if (resposta.status === 404) {
-          return responderMockDemo(urlStr, init);
-        }
-        return resposta;
+        return await fetchOriginal(input, opcoes);
       } catch (err) {
-        return responderMockDemo(urlStr, init);
+        return new Response(JSON.stringify({ detail: 'Erro de conexão com o servidor. Verifique sua internet e tente novamente.' }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' }
+        });
       }
     }
 
