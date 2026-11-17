@@ -1020,7 +1020,7 @@ async function confirmarRedefinicaoSenhaLogin() {
     }
     return;
   }
-  if (!novaSenha || novaSenha.length < 4) {
+  if (!novaSenha || novaSenha.length < 8 || !/[a-zA-Z]/.test(novaSenha) || !/[0-9]/.test(novaSenha)) {
     if (divErro) {
       divErro.textContent = 'A nova senha deve possuir no mínimo 4 caracteres.';
       divErro.style.display = 'block';

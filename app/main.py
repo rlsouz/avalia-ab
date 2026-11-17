@@ -837,7 +837,6 @@ def autenticar_usuario(dados: LoginUsuarioDTO, request: Request, response: Respo
         u_cpf_limpo = "".join(ch for ch in (u.get("cpf") or "") if ch.isdigit())
         if (
             ident.lower() == (u.get("email") or "").strip().lower()
-            or ident.lower() == (u.get("nome") or "").strip().lower()
             or ident.lower() == (u.get("codigo") or "").strip().lower()
             or (ident_limpo_cpf and len(ident_limpo_cpf) >= 6 and ident_limpo_cpf == u_cpf_limpo)
         ):
@@ -935,7 +934,6 @@ def redefinir_senha_usuario(dados: RedefinirSenhaDTO, request: Request):
         u_cpf_limpo = "".join(ch for ch in (u.get("cpf") or "") if ch.isdigit())
         if (
             ident.lower() == (u.get("email") or "").strip().lower()
-            or ident.lower() == (u.get("nome") or "").strip().lower()
             or ident.lower() == (u.get("codigo") or "").strip().lower()
             or (ident_limpo_cpf and len(ident_limpo_cpf) >= 6 and ident_limpo_cpf == u_cpf_limpo)
         ):
@@ -997,6 +995,18 @@ def cadastrar_usuario(dados: NovoUsuarioDTO):
             raise HTTPException(status_code=400, detail=erro_forca)
     conn = get_db_connection()
     cursor = conn.cursor()
+    cpf_limpo = re.sub(r"\D", "", dados.cpf or "")
+    email_limpo = (dados.email or "").strip().lower()
+    cursor.execute("SELECT cpf, email FROM usuarios")
+    for u_row in cursor.fetchall():
+        u_cpf = re.sub(r"\D", "", (u_row["cpf"] or ""))
+        u_email = (u_row["email"] or "").strip().lower()
+        if cpf_limpo and u_cpf == cpf_limpo:
+            conn.close()
+            raise HTTPException(status_code=400, detail="Já existe um usuário cadastrado com este CPF.")
+        if email_limpo and u_email == email_limpo:
+            conn.close()
+            raise HTTPException(status_code=400, detail="Já existe um usuário cadastrado com este E-mail.")
     cursor.execute("SELECT MAX(id) FROM usuarios")
     max_id = cursor.fetchone()[0] or 0
     novo_id = max_id + 1

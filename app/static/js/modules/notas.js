@@ -401,9 +401,9 @@ async function salvarTodasAsNotasEmMassa() {
       const valMATStr = (inputMAT.value || '').trim().replace(',', '.');
       if (valLPStr === '' && valMATStr === '') continue;
 
-      const numLP = valLPStr === '' ? 0 : parseFloat(valLPStr);
-      const numMAT = valMATStr === '' ? 0 : parseFloat(valMATStr);
-      if (isNaN(numLP) || numLP < 0 || numLP > 10 || isNaN(numMAT) || numMAT < 0 || numMAT > 10) {
+      const numLP = valLPStr === '' ? (a.nota_lp ?? null) : parseFloat(valLPStr);
+      const numMAT = valMATStr === '' ? (a.nota_mat ?? null) : parseFloat(valMATStr);
+      if ((numLP !== null && (isNaN(numLP) || numLP < 0 || numLP > 10)) || (numMAT !== null && (isNaN(numMAT) || numMAT < 0 || numMAT > 10))) {
         mostrarToast(`Nota inválida para ${a.nome}: informe valores entre 0,0 e 10,0.`, 'erro');
         return;
       }
@@ -417,8 +417,8 @@ async function salvarTodasAsNotasEmMassa() {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            nota_lp: Math.round(numLP * 10) / 10,
-            nota_mat: Math.round(numMAT * 10) / 10,
+            ...(numLP !== null ? { nota_lp: Math.round(numLP * 10) / 10 } : {}),
+            ...(numMAT !== null ? { nota_mat: Math.round(numMAT * 10) / 10 } : {}),
             ano_letivo: anoLetivoNotas
           })
         });

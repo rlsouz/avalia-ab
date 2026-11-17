@@ -190,8 +190,8 @@ function atualizarGraficosParametrizados(alunos, escola, turma, disciplina) {
       labels = escolasUnicas.map(e => e.replace('EMEB ', ''));
       escolasUnicas.forEach(esc => {
         const doEscola = alunos.filter(a => a.nome_escola === esc);
-        const medLp = doEscola.reduce((s, a) => s + (a.nota_lp || 8.0), 0) / (doEscola.length || 1);
-        const medMat = doEscola.reduce((s, a) => s + (a.nota_mat || 8.0), 0) / (doEscola.length || 1);
+        const medLp = doEscola.reduce((s, a) => s + (a.nota_lp || 0.0), 0) / (doEscola.length || 1);
+        const medMat = doEscola.reduce((s, a) => s + (a.nota_mat || 0.0), 0) / (doEscola.length || 1);
         dataLp.push(parseFloat(medLp.toFixed(1)));
         dataMat.push(parseFloat(medMat.toFixed(1)));
       });
@@ -202,8 +202,8 @@ function atualizarGraficosParametrizados(alunos, escola, turma, disciplina) {
       labels = turmasUnicas;
       turmasUnicas.forEach(t => {
         const doTurma = alunos.filter(a => a.turma === t);
-        const medLp = doTurma.reduce((s, a) => s + (a.nota_lp || 8.0), 0) / (doTurma.length || 1);
-        const medMat = doTurma.reduce((s, a) => s + (a.nota_mat || 8.0), 0) / (doTurma.length || 1);
+        const medLp = doTurma.reduce((s, a) => s + (a.nota_lp || 0.0), 0) / (doTurma.length || 1);
+        const medMat = doTurma.reduce((s, a) => s + (a.nota_mat || 0.0), 0) / (doTurma.length || 1);
         dataLp.push(parseFloat(medLp.toFixed(1)));
         dataMat.push(parseFloat(medMat.toFixed(1)));
       });

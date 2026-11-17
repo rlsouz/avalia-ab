@@ -1676,16 +1676,27 @@ main, .app-main, #main-content {
     overflow-x: hidden !important;
     max-width: 100vw !important;
   }
-  .app-header, .header-container, .header-top, .nav-bar {
+  .top-navbar {
     flex-wrap: wrap !important;
     max-width: 100% !important;
-    padding-left: 10px !important;
-    padding-right: 10px !important;
+    padding: 10px 12px !important;
+    height: auto !important;
+    gap: 8px !important;
   }
-  .header-right, .user-controls {
+  .navbar-brand {
+    max-width: 100% !important;
     flex-wrap: wrap !important;
-    gap: 6px !important;
-    justify-content: flex-end !important;
+  }
+  .navbar-actions {
+    width: 100% !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    justify-content: space-between !important;
+  }
+  .btn-logout {
+    display: inline-flex !important;
+    padding: 6px 12px !important;
+    font-size: 0.82rem !important;
   }
   .metrics-grid, .dashboard-grid-2cols, .modal-row {
     grid-template-columns: 1fr !important;
